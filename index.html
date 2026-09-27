@@ -11,6 +11,12 @@
     <meta property="og:description" content="Open daily 6am–midnight. $8 wash, $8 dry, contactless payment. 67A Reservoir Street, Surry Hills NSW.">
     <meta property="og:url" content="https://www.reservoirlaundry.com.au/">
     <meta property="og:image" content="https://www.reservoirlaundry.com.au/IMG_7178.jpeg">
+    <meta property="og:locale" content="en_AU">
+    <meta property="og:site_name" content="Reservoir St Self Service Laundry">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Reservoir St Self Service Laundry — Surry Hills">
+    <meta name="twitter:description" content="Open daily 6am–midnight. $8 wash, $8 dry, contactless payment. 67A Reservoir Street, Surry Hills NSW.">
+    <meta name="twitter:image" content="https://www.reservoirlaundry.com.au/IMG_7178.jpeg">
     <link rel="canonical" href="https://www.reservoirlaundry.com.au/">
     <link rel="icon" href="IMG_7178.jpeg">
     <link rel="apple-touch-icon" href="IMG_7178.jpeg">
@@ -454,21 +460,28 @@
         gap: 8px;
     }
 
-    .busy-times-placeholder {
-        width: 100%;
-        min-height: 160px;
-        background: linear-gradient(135deg, var(--foam), #e0eee6);
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: var(--ocean);
-        font-size: 0.8rem;
-        font-weight: 500;
-        opacity: 0.7;
-        border: 2px dashed rgba(27,73,101,0.15);
+    .skip-nav {
+        position: absolute;
+        left: -9999px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+    .skip-nav:focus {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: auto;
+        height: auto;
+        padding: 12px 20px;
+        background: var(--ocean);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        z-index: 9999;
+        border-radius: 0 0 8px 0;
+        overflow: visible;
     }
 
     /* ─── INSTRUCTIONS ─── */
@@ -952,7 +965,7 @@
   "@type": "LaundryOrDryCleaning",
   "name": "Reservoir St Self Service Laundry",
   "url": "https://www.reservoirlaundry.com.au/",
-  "telephone": "+61447488879",
+  "telephone": ["+61447488879", "+61477314754"],
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "67A Reservoir Street",
@@ -965,7 +978,7 @@
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
     "opens": "06:00",
-    "closes": "00:00"
+    "closes": "24:00"
   }],
   "priceRange": "$$",
   "currenciesAccepted": "AUD",
@@ -991,6 +1004,9 @@
         </button>
     </div>
 </nav>
+
+<a href="#main-content" class="skip-nav">Skip to main content</a>
+<main id="main-content">
 
 <!-- Hero -->
 <section class="hero">
@@ -1041,7 +1057,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </div>
                         <h3>Location</h3>
-                        <p>67A Reservoir Street, Surry Hills, NSW 2010<br><a href="https://maps.app.goo.gl/hxygq5tBSLVebkU29?g_st=com.google.maps.preview.copy" target="_blank" rel="noopener">Open in Google Maps →</a></p>
+                        <p>67A Reservoir Street, Surry Hills, NSW 2010<br><a href="https://maps.app.goo.gl/hxygq5tBSLVebkU29" target="_blank" rel="noopener noreferrer">Open in Google Maps →</a></p>
                     </div>
 
                     <div class="info-card reveal">
@@ -1121,17 +1137,17 @@
         <p class="section-subtitle reveal">Easy-to-follow guides for our wash and dry machines, available in multiple languages.</p>
 
         <div class="lang-tabs reveal" role="tablist" aria-label="Language selector">
-            <button class="lang-tab active" onclick="switchLang(this, 'en')" role="tab" aria-selected="true" aria-controls="lang-en">🇬🇧 English</button>
-            <button class="lang-tab" onclick="switchLang(this, 'zh')" role="tab" aria-selected="false" aria-controls="lang-zh">🇨🇳 中文</button>
-            <button class="lang-tab" onclick="switchLang(this, 'ja')" role="tab" aria-selected="false" aria-controls="lang-ja">🇯🇵 日本語</button>
-            <button class="lang-tab" onclick="switchLang(this, 'ko')" role="tab" aria-selected="false" aria-controls="lang-ko">🇰🇷 한국어</button>
+            <button class="lang-tab active" id="tab-en" onclick="switchLang(this, 'en')" role="tab" aria-selected="true" aria-controls="lang-en" tabindex="0">🇬🇧 English</button>
+            <button class="lang-tab" id="tab-zh" onclick="switchLang(this, 'zh')" role="tab" aria-selected="false" aria-controls="lang-zh" tabindex="-1">🇨🇳 中文</button>
+            <button class="lang-tab" id="tab-ja" onclick="switchLang(this, 'ja')" role="tab" aria-selected="false" aria-controls="lang-ja" tabindex="-1">🇯🇵 日本語</button>
+            <button class="lang-tab" id="tab-ko" onclick="switchLang(this, 'ko')" role="tab" aria-selected="false" aria-controls="lang-ko" tabindex="-1">🇰🇷 한국어</button>
         </div>
 
         <div class="instruction-content reveal">
-            <div id="lang-en" class="lang-content" style="display: block;">
-                <img src="IMG_7177.jpeg" alt="Washer and Dryer Instructions in English" style="width:100%; border-radius:12px;">
+            <div id="lang-en" class="lang-content" role="tabpanel" aria-labelledby="tab-en" style="display: block;">
+                <img src="IMG_7177.jpeg" alt="Washer and Dryer Instructions in English" loading="lazy" style="width:100%; border-radius:12px;">
             </div>
-            <div id="lang-zh" class="lang-content" lang="zh" style="display: none;">
+            <div id="lang-zh" class="lang-content" role="tabpanel" aria-labelledby="tab-zh" lang="zh" style="display: none;">
                 <div class="translated-instructions">
                     <h3>请阅读使用说明</h3>
 
@@ -1175,7 +1191,7 @@
                     </div>
                 </div>
             </div>
-            <div id="lang-ja" class="lang-content" lang="ja" style="display: none;">
+            <div id="lang-ja" class="lang-content" role="tabpanel" aria-labelledby="tab-ja" lang="ja" style="display: none;">
                 <div class="translated-instructions">
                     <h3>ご利用案内をお読みください</h3>
 
@@ -1219,7 +1235,7 @@
                     </div>
                 </div>
             </div>
-            <div id="lang-ko" class="lang-content" lang="ko" style="display: none;">
+            <div id="lang-ko" class="lang-content" role="tabpanel" aria-labelledby="tab-ko" lang="ko" style="display: none;">
                 <div class="translated-instructions">
                     <h3>사용 설명서를 반드시 읽어주세요</h3>
 
@@ -1358,9 +1374,11 @@
     </div>
 </section>
 
+</main>
+
 <!-- Footer -->
 <footer>
-    <p>&copy; 2026 Reservoir St Self Service Laundry · 67A Reservoir Street, Surry Hills NSW 2010 · <a href="https://maps.app.goo.gl/hxygq5tBSLVebkU29?g_st=com.google.maps.preview.copy" target="_blank" rel="noopener noreferrer">Get Directions</a></p>
+    <p>&copy; 2026 Reservoir St Self Service Laundry · 67A Reservoir Street, Surry Hills NSW 2010 · <a href="https://maps.app.goo.gl/hxygq5tBSLVebkU29" target="_blank" rel="noopener noreferrer">Get Directions</a></p>
 </footer>
 
 <script>
@@ -1376,22 +1394,39 @@
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.addEventListener('click', () => {
             document.getElementById('navLinks').classList.remove('open');
+            const btn = document.getElementById('hamburger');
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-label', 'Open navigation menu');
         });
     });
 
     // Navbar scroll effect
     window.addEventListener('scroll', () => {
         document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
-    });
+    }, { passive: true });
 
     // Language tab switching
     function switchLang(btn, lang) {
-        document.querySelectorAll('.lang-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+        document.querySelectorAll('.lang-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); t.setAttribute('tabindex', '-1'); });
         btn.classList.add('active');
         btn.setAttribute('aria-selected', 'true');
+        btn.setAttribute('tabindex', '0');
         document.querySelectorAll('.lang-content').forEach(c => c.style.display = 'none');
         document.getElementById('lang-' + lang).style.display = 'block';
     }
+
+    // Language tab keyboard navigation (arrow keys)
+    document.querySelector('[role="tablist"]').addEventListener('keydown', e => {
+        const tabs = [...document.querySelectorAll('[role="tab"]')];
+        const idx  = tabs.indexOf(document.activeElement);
+        if (idx === -1) return;
+        let next = -1;
+        if (e.key === 'ArrowRight') next = (idx + 1) % tabs.length;
+        if (e.key === 'ArrowLeft')  next = (idx - 1 + tabs.length) % tabs.length;
+        if (e.key === 'Home')       next = 0;
+        if (e.key === 'End')        next = tabs.length - 1;
+        if (next !== -1) { e.preventDefault(); tabs[next].focus(); tabs[next].click(); }
+    });
 
     // Scroll reveal
     const observer = new IntersectionObserver((entries) => {
@@ -1439,7 +1474,7 @@
                 hls = new Hls({ lowLatencyMode: true });
                 hls.loadSource(STREAM_URL);
                 hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play(); });
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); });
                 hls.on(Hls.Events.ERROR, (_, data) => {
                     if (data.fatal) { offline.style.display = 'flex'; badge.style.display = 'none'; setTimeout(startStream, 10000); }
                 });
