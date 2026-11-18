@@ -19,9 +19,7 @@ SYDNEY = ZoneInfo("Australia/Sydney")
 URL = "https://mfsdnfhoifahvlsjzzxf.supabase.co"
 TABLE = "rssl_customer_surveys"
 TO_KEY = "RSSL_REPORT_TO"
-FROM_KEY = "RSSL_REPORT_FROM"
 API_KEY = "SUPABASE_SERVICE_ROLE_KEY"
-MAIL_KEY = "RESEND_API_KEY"
 DISPLAY = {
     "google_maps": "Google Maps",
     "google_search": "Google Search",
@@ -205,23 +203,32 @@ def make_message(recent, older, start, end):
 
 
 def send_email(label, text, html_body):
-    mail_key = required(MAIL_KEY)
-    target = required(TO_KEY)
-    sender = required(FROM_KEY)
-    payload = json.dumps({
-        "from": sender, "to": [target],
-        "subject": "RSSL | Weekly Customer Insights — " + label,
-        "text": text, "html": html_body,
-    }).encode("utf-8")
-    req = urllib.request.Request("https://api.resend.com/emails", data=payload, method="POST",
-       headers={"Authorization": "Bearer " + mail_key, "Content-Type": "application/json",
-                "Idempotency-Key": "rssl-weekly-" + label.encode("ascii", "ignore").decode("ascii").replace(" ", "-")})
+    """Send directly through the owner's Gmail account using an App Password.
+
+    Credentials are loaded from GitHub Actions Secrets at runtime, not from
+    the public survey website or repository code.
+    """
+    import smtplib
+    import ssl
+    from email.message import EmailMessage
+
+    gmail_address = required(TO_KEY)
+    app_password = required("RSSL_GMAIL_APP_PASSWORD").replace(" ", "")
+    msg = EmailMessage()
+    msg["From"] = "RSSL Customer Insights <" + gmail_address + ">"
+    msg["To"] = gmail_address
+    msg["Subject"] = "RSSL | Weekly Customer Insights — " + label
+    msg.set_content(text)
+    msg.add_alternative(html_body, subtype="html")
     try:
-        with urllib.request.urlopen(req, timeout=30) as res:
-            result = json.load(res)
-    except urllib.error.HTTPError as e:
-        raise RuntimeError("Resend email send failed: HTTP " + str(e.code)) from e
-    print("Resend accepted weekly email, message id:", result.get("id", "[not returned]"))
+        with smtplib.SMTP_SSL(
+            "smtp.gmail.com", 465, context=ssl.create_default_context(), timeout=30
+        ) as smtp:
+            smtp.login(gmail_address, app_password)
+            smtp.send_message(msg)
+    except (smtplib.SMTPException, OSError) as e:
+        raise RuntimeError("Gmail SMTP delivery failed (" + type(e).__name__ + ")") from None
+    print("Gmail SMTP accepted the weekly report for:", label)
 
 
 def main():
