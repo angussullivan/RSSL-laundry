@@ -4,7 +4,7 @@
  * Runs under the owner's Google Account using Google Apps Script.
  * Reads anonymous survey rows from Supabase using a server-side secret stored
  * in Project Settings > Script Properties (never in website/public GitHub code).
- * Sends the report directly from that Google account with GmailApp.
+ * Sends the report directly from that Google account with MailApp.
  *
  * Setup: see survey/GMAIL_APPS_SCRIPT_SETUP.md in the RSSL-laundry GitHub repo.
  */
@@ -86,11 +86,11 @@ function rsslDeliver_(start, endExclusive, isTest) {
   const suffix = isTest ? ' [LIVE TEST]' : '';
   const subject = 'RSSL | Weekly Customer Insights — ' + report.period + suffix;
 
-  GmailApp.sendEmail(recipient, subject, report.plain, {
+  MailApp.sendEmail(recipient, subject, report.plain, {
     htmlBody: report.html,
     name: 'RSSL Customer Insights'
   });
-  console.log('GmailApp sent report: ' + report.period
+  console.log('MailApp accepted report: ' + report.period
     + '; survey responses ' + current.length + '; previous ' + previous.length);
 }
 
