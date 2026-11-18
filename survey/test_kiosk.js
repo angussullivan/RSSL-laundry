@@ -7,7 +7,9 @@ const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const match = html.match(/<script>\n(\(\(\) => \{[\s\S]*?\}\)\(\);)\n<\/script>/);
 assert.ok(match, 'Self-contained survey JavaScript exists in index.html');
-const code = match[1];
+// Keep regression coverage for old queued V1 clients even after V2 goes live.
+const code = match[1].replace('const ACQUISITION_V2_ENABLED = true;',
+  'const ACQUISITION_V2_ENABLED = false;');
 assert.doesNotThrow(() => new Function(code), 'Survey JavaScript compiles');
 const translated = code.match(/const LANGUAGE_PACKS = (\{[^\n]*\});/);
 assert.ok(translated, 'Embedded language translations exist');
