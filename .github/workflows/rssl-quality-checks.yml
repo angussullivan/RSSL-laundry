@@ -9,8 +9,6 @@ on:
       - 'survey/test_sw.js'
       - 'scripts/rssl_weekly_report.py'
       - 'scripts/test_rssl_weekly_report.py'
-      - 'scripts/RSSL_Weekly_Email_Apps_Script.gs'
-      - 'scripts/test_apps_script.js'
       - 'scripts/rssl_weekly_report.gs'
       - 'scripts/test_rssl_apps_script.js'
       - '.github/workflows/rssl-weekly-report.yml'
@@ -37,7 +35,5 @@ jobs:
           node survey/test_sw.js
       - name: Test Google Apps Script Gmail replacement with no real credentials
         run: node scripts/test_rssl_apps_script.js
-      - name: Test Google Apps Script mail delivery, DST and scheduling
-        run: node scripts/test_apps_script.js
       - name: Test legacy reporting calculations and Supabase reads
         run: python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py' -v
