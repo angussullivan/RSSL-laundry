@@ -6,6 +6,10 @@
  * 3) Run installMondaySchedule() exactly once to activate weekly sends
  * No Gmail App Password or SMTP required.
  */
+// Enable only after the RSSL Supabase additive migration has been applied.
+// Keep false while existing customer surveys continue to use V1.
+const RSSL_ACQUISITION_V2_REPORT = false;
+
 const RSSL = Object.freeze({
   projectUrl: 'https://mfsdnfhoifahvlsjzzxf.supabase.co',
   table: 'rssl_customer_surveys',
@@ -50,12 +54,16 @@ function rsslSurveyRows_(startUtc, endUtc) {
   const fields = [
     'submission_id', 'submitted_at', 'visit_type', 'discovery_source',
     'google_today', 'experience', 'improvement'
-  ].join(',');
+  ];
+  if (RSSL_ACQUISITION_V2_REPORT) {
+    fields.push('choice_reason','customer_context','discovery_detail','survey_language','survey_version');
+  }
+  const fieldList = fields.join(',');
   const rows = [];
   const limit = 1000;
   for (let offset = 0; offset < 200000; offset += limit) {
     const query = [
-      'select=' + encodeURIComponent(fields),
+      'select=' + encodeURIComponent(fieldList),
       'submitted_at=gte.' + encodeURIComponent(startUtc),
       'submitted_at=lt.' + encodeURIComponent(endUtc),
       'order=submitted_at.asc',
@@ -112,6 +120,72 @@ function rsslEscape_(v) {
   );
 }
 
+/** Clearly separate first-time choices from returning-customer operations data. */
+function rsslBreakdown_(rows, field, categories, firstTimeOnly) {
+  const population = firstTimeOnly ? rows.filter(r => r.visit_type === 'first') : rows;
+  const sample = population.filter(r => r[field] != null && r[field] !== '');
+  if (!sample.length) return 'No answers (n=0)';
+  const pairs = Object.entries(categories).map(([code, label]) => {
+    const count = sample.filter(r => r[field] === code).length;
+    return count ? label + ': ' + count + ' (' +
+      Math.round(100 * count / sample.length) + '%)' : null;
+  }).filter(Boolean);
+  const accounted = Object.keys(categories);
+  const uncategorised = sample.filter(r => !accounted.includes(r[field])).length;
+  if (uncategorised) pairs.push('Uncategorised: ' + uncategorised);
+  return 'n=' + sample.length + ': ' + (pairs.length ? pairs.join(' · ') : 'No classified answers');
+}
+
+function rsslAcquisitionDetails_(last, sixWeek) {
+  const sourceLabels = {
+    google_maps: 'Google Maps', google_search: 'Google Search',
+    walk_by: 'Walking past', recommendation: 'Friend/family',
+    host_referral: 'Accommodation host / hotel',
+    apple_maps: 'Apple Maps / other maps', other: 'Other', unsure: 'Cannot remember'
+  };
+  const reasonLabels = {
+    location: 'Convenient location', hours: 'Opening hours',
+    reviews: 'Ratings / reviews', price: 'Price', card: 'Card payment',
+    machine: 'Machine size / availability', referral: 'Recommendation', other: 'Other'
+  };
+  const contextLabels = {
+    resident: 'Lives nearby', work_study: 'Works / studies nearby',
+    staying_nearby: 'Staying nearby (accommodation)', visiting_area: 'Visiting area',
+    prefer_not: 'Prefer not to say'
+  };
+  const languageLabels = {
+    en: 'English', 'zh-CN': 'Simplified Chinese', 'zh-TW': 'Traditional Chinese',
+    ja: 'Japanese', ko: 'Korean', hi: 'Hindi', id: 'Indonesian',
+    es: 'Spanish', fr: 'French', 'pt-BR': 'Portuguese', de: 'German'
+  };
+  // The base source is 'other' for hotel and Apple Maps to respect legacy checks.
+  const channel = r => r.discovery_detail === 'host_referral' ||
+    r.discovery_detail === 'apple_maps' ? r.discovery_detail : r.discovery_source;
+  const sourceBreakdown = data =>
+    rsslBreakdown_(data.filter(r => r.visit_type === 'first')
+      .map(r => ({...r, source_refined: channel(r)})),
+      'source_refined',sourceLabels,false);
+  const blocks = [
+    ['First-time discovery channels', sourceBreakdown(last), sourceBreakdown(sixWeek)],
+    ['Why first-time customers chose RSSL',
+      rsslBreakdown_(last,'choice_reason',reasonLabels,true),
+      rsslBreakdown_(sixWeek,'choice_reason',reasonLabels,true)],
+    ['Local residents versus travellers (first-timers)',
+      rsslBreakdown_(last,'customer_context',contextLabels,true),
+      rsslBreakdown_(sixWeek,'customer_context',contextLabels,true)],
+    ['Survey language selected (not nationality)',
+      rsslBreakdown_(last,'survey_language',languageLabels,false),
+      rsslBreakdown_(sixWeek,'survey_language',languageLabels,false)]
+  ];
+  const text = blocks.map(([label,week,benchmark]) =>
+    label + '\nLast week: ' + week + '\n6-week sample: ' + benchmark).join('\n\n');
+  const html = blocks.map(([label,week,benchmark]) =>
+    '<h3>' + rsslEscape_(label) + '</h3><p><b>Last week:</b> ' +
+    rsslEscape_(week) + '</p><p><b>6-week sample:</b> ' +
+    rsslEscape_(benchmark) + '</p>').join('');
+  return {text,html};
+}
+
 function rsslBuildReport_(recent, older, sixWeek, periodLabel, isTest, benchmarkPeriod) {
   const metrics = [
     ['Survey responses', String(recent.length), String(older.length)],
@@ -164,6 +238,8 @@ function rsslBuildReport_(recent, older, sixWeek, periodLabel, isTest, benchmark
   const limitations = 'Voluntary survey responses are not the full paying-customer population. ' +
     'Google Maps/Search discovery is not proof that a paid ad caused a visit. ' +
     'Revenue and Google Ads spending are not connected to this report.';
+  const acquisition = RSSL_ACQUISITION_V2_REPORT ?
+    rsslAcquisitionDetails_(recent,sixWeek) : {text:'',html:''};
   const prefix = isTest ? '[TEST · Current week to date] ' : '';
   const subject = prefix + 'RSSL | Weekly Customer Insights — ' + periodLabel;
   const tableHead = '<tr><th align="left">Metric</th><th align="left">' + (isTest ? 'Week to date' : 'Last week') + '</th><th align="left">Previous week</th><th align="left">6-week average / benchmark</th></tr>';
@@ -180,6 +256,7 @@ function rsslBuildReport_(recent, older, sixWeek, periodLabel, isTest, benchmark
     '<p style="font-size:12px;color:#526d67">' + rsslEscape_(benchmarkNote) + '</p>' +
     '<h3>Where visitors first discovered us</h3><p>' + rsslEscape_(sources) + '</p>' +
     '<h3>Most requested improvements</h3><p>' + rsslEscape_(issues) + '</p>' +
+    acquisition.html +
     '<h3>Recommendation</h3><p>' + rsslEscape_(recommendation) + '</p>' +
     '<h3>Important limitations</h3><p>' + rsslEscape_(limitations) + '</p>' +
     '<p style="font-size:12px;color:#777">Anonymous in-store survey · Percentages exclude skipped answers ' +
@@ -188,6 +265,7 @@ function rsslBuildReport_(recent, older, sixWeek, periodLabel, isTest, benchmark
     ...metrics.map(row => row.join(' | ')), '', benchmarkNote, '',
     'First discovery: ' + sources,
     'Improvements: ' + issues,
+    acquisition.text,
     'Limitations: ' + limitations
   ].join('\n');
   return {subject: subject, body: plain, htmlBody: htmlBody};
