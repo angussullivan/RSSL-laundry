@@ -32,6 +32,7 @@ jobs:
       - name: Run kiosk and reporting regression tests
         run: |
           node survey/test_kiosk.js
+          node survey/test_sw.js
           python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py'
       - name: Generate report and send email
         env:
