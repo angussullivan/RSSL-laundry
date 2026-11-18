@@ -3,8 +3,7 @@
 ## Current status
 The Supabase database read and report calculations passed in a real GitHub
 Actions run. However, the GitHub runner's direct Gmail SMTP connections were
-disconnected on both ports 465 and 587. The old GitHub email schedule is
-therefore being retired. The replacement below runs in **Google Apps Script**
+disconnected on both ports 465 and 587. The old GitHub email schedule has been disabled to prevent repeated failures. The replacement below runs in **Google Apps Script**
 using **Google MailApp**; it requires a one-time authorisation by the Gmail
 account owner.
 
@@ -16,39 +15,38 @@ account owner.
    <https://script.google.com/home/projects/create>. Create a project named
    `RSSL Weekly Customer Insights`.
 2. Replace everything in `Code.gs` with the complete source from:
-   <https://raw.githubusercontent.com/angussullivan/RSSL-laundry/main/scripts/rssl_weekly_report.gs>
+   <https://raw.githubusercontent.com/angussullivan/RSSL-laundry/main/scripts/RSSL_Weekly_Email_Apps_Script.gs>
    Save (Ctrl+S or the Save icon). The public source contains no secret keys.
 3. Click the **gear icon (Project Settings)** on the left. Under **Script
-   properties** select **Add script property**. Add:
-   - `RSSL_REPORT_TO` = `angussullivan@gmail.com`
+   properties** select **Add script property**. Add **just one property**:
    - `RSSL_SUPABASE_SECRET_KEY` = the modern `sb_secret_...` value copied from
      the **RSSL Customer Survey** Supabase project's Settings > API Keys >
      Secret keys. **Never** paste this key in GitHub public source or a chat.
    Save the script properties.
 4. Return to the **Editor**. In the function selector at the top,
-   choose `sendTestReport`, then click **Run**. Google will request
+   choose `sendTestReportNow`, then click **Run**. Google will request
    authorisation for the script to send emails and access the Supabase API.
    Review the permissions and approve only if you trust the copied source.
-   This run should produce an email with **[LIVE TEST]** in the subject,
+   This run should produce an email with **[TEST · Current week to date]** in the subject,
    for the **current Monday-to-today reporting period**. That avoids
    receiving a misleading empty report from before the survey was launched.
 5. Check the Gmail Inbox and **Sent** folder for:
-   `RSSL | Weekly Customer Insights — ... [LIVE TEST]`.
+   `[TEST · Current week to date] ...`.
    If there is an error, open **Executions** in Apps Script to review it.
 6. After confirming the test email, choose the function
-   `installWeeklyTrigger` and click **Run** once. This safely replaces any
-   pre-existing trigger for `sendWeeklyReport`.
+   `installMondaySchedule` and click **Run** once. This safely replaces any
+   pre-existing trigger for `sendWeeklyRsslReport`.
    It creates an installable Monday morning trigger in the
    `Australia/Sydney` time zone, nominally **9:15am**.
    Google Apps Script schedules `nearMinute(15)` within a ±15-minute window;
    it **does not guarantee an exact delivery minute**.
 7. Optionally, verify the trigger under the clock icon **Triggers** on the
-   left; it should show `sendWeeklyReport`, Time-driven, Weekly, Monday.
+   left; it should show `sendWeeklyRsslReport`, Time-driven, Weekly, Monday.
 
 ## How the scheduled email works
 
-- `sendTestReport`: partial **current week**, clearly marked LIVE TEST.
-- `sendWeeklyReport`: full **previous Monday–Sunday** (Sydney local dates).
+- `sendTestReportNow`: partial **current week**, clearly marked TEST.
+- `sendWeeklyRsslReport`: full **previous Monday–Sunday** (Sydney local dates).
 - Reads Supabase server-side via HTTPS using `RSSL_SUPABASE_SECRET_KEY` in
   **Apps Script Properties**, not the kiosk's browser key.
 - Sends aggregate first-time/returning customer, Google Maps/Search discovery,
@@ -75,7 +73,7 @@ account owner.
   Google App Password at <https://myaccount.google.com/apppasswords>.
   The reporting script's Supabase secret can also be removed from GitHub
   if GitHub reporting previews are no longer needed.
-- To stop the schedule, run `removeWeeklyTrigger` or delete it from Triggers.
+- To stop the schedule, delete the `sendWeeklyRsslReport` trigger from Triggers.
 
 ## Troubleshooting
 
