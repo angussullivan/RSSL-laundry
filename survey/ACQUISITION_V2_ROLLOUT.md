@@ -1,126 +1,112 @@
-# RSSL Acquisition Survey V2 — activation checklist
-**Prepared:** 18 November 2026  
-**Current status:** code staged, GitHub automated tests passing, live V1 collecting responses.
+# RSSL Acquisition Survey V2 — live launch record
 
-## What is built
-- Maintains the 11 native-language tiles and Galaxy Tab A11+ landscape touch UI.
-- Keeps the same five-question, single-tap format.
-- All customers: visit history, discovery channel (now includes accommodation hosts/hotels and Apple Maps), and Google navigation today.
-- First-time customers (or unknown status): why they chose RSSL; whether local resident/worker or staying nearby/visiting.
-- Returning customers: original satisfaction and improvement questions remain.
-- Translates all new wording and choices across 11 languages with automated language completeness checks.
-- Keeps existing `discovery_source` values. For accommodation or Apple Maps,
-  `discovery_source='other'` AND `discovery_detail='host_referral'|'apple_maps'`.
-  This avoids changing existing column constraints and preserves historical trends.
-- New nullable fields only: `choice_reason`, `customer_context`, `discovery_detail`, `survey_language`, `survey_version`. Old responses and offline queue remain compatible.
-- Adds first-time channel, choice-driver, local-versus-traveller, and language insights to the weekly Gmail report, with separate n and six-week comparison.
-- No free-text, name, contact information, location tracking, advertising IDs, or new external tracking services.
+**Date:** 18 November 2026  
+**Public survey:** https://www.reservoirlaundry.com.au/survey/  
+**Status:** LIVE; end-to-end database acceptance tests passed; owner update to
+private Gmail Apps Script still required for new reporting sections.
 
-## Verified live database facts
-An authenticated, **read-only GitHub Actions** schema preflight on 18 November 2026 confirmed these production columns:
-`answered_at, discovery_source, experience, google_today, improvement, submission_id, submitted_at, visit_type`.
+## Customer-facing design now active
 
-**The five new V2 columns have now been added to the live Supabase database.**
-The current blocker is missing anonymous INSERT privilege (HTTP 401 / 42501); this is why V2 remains off. The existing V1 customer survey remains live and functional. V2-preview submissions are never stored.
+The RSSL Galaxy Tab A11+ landscape survey retains 11 language tiles, the
+business logo, five short tap questions, the English-coded response table,
+automatic reset and offline queue.
 
-## Database access check after migration — 18 November 2026
+Everyone answers:
+1. First-time or returning visit.
+2. How they *originally* discovered RSSL, now including hotel/Airbnb host
+   referrals and Apple Maps.
+3. Whether they used Google Maps or Search for *today's* visit.
 
-The five V2 columns **were confirmed present** in a fresh, read-only Supabase
-preflight. A subsequent live integration attempt (browser publishable key,
-synthetic record, no personal data) returned:
+First-time customers (and those who do not specify a history) answer:
+4. The principal reason they chose RSSL (location, opening hours, reviews,
+   price, card payment, machine availability, recommendation, other).
+5. Whether they live/work/study nearby or are staying/visiting in the area.
 
-`HTTP 401 / Postgres 42501: permission denied for table rssl_customer_surveys`
+Returning customers instead answer:
+4. How the visit has been.
+5. Which operational improvement they would prioritise.
 
-Supabase explicitly asked for `GRANT INSERT ON public.rssl_customer_surveys
-TO anon;`. This is a database **table privilege**, separate from the RLS
-row policy; the new columns were successfully created.
+One response per answer, no typing, no name/email/phone/precise address.
 
-**Smallest safe fix (user SQL Editor action):**
-Run [ACQUISITION_V2_ANON_INSERT_FIX.sql](ACQUISITION_V2_ANON_INSERT_FIX.sql)
-in the RSSL Supabase project. It enforces RLS and gives anonymous browser
-clients INSERT privilege **only**, never SELECT/UPDATE/DELETE. It also
-displays the resulting grants and policies for inspection.
+## Data model: confirmed in production
 
-Then rerun the live acceptance test (via GitHub Actions) and verify the
-two synthetic inserts, readbacks and deletion succeed. Keep V2 production
-disabled until test success. If the next failure is RLS-policy-specific,
-inspect the policies before adding or broadening any RLS rule.
+An additive migration created five optional columns:
+`choice_reason`, `customer_context`, `discovery_detail`,
+`survey_language` and `survey_version`. All legacy columns and historical
+responses remain intact. V1 queued responses still work.
 
-**Do not publish the server secret or put it in the tablet.**
+The existing `discovery_source` code remains `other` for
+`host_referral` and `apple_maps`; the new `discovery_detail` column
+records the finer distinctions. Never interpret survey language as nationality.
 
-## SAFE PREVIEW NOW (no database writes)
-https://www.reservoirlaundry.com.au/survey/?preview_v2=1
+The PostgREST anonymous database role initially lacked table INSERT
+permission (HTTP 401 / 42501). The owner applied
+[ACQUISITION_V2_ANON_INSERT_FIX.sql](ACQUISITION_V2_ANON_INSERT_FIX.sql),
+which grants INSERT only while retaining RLS.
 
-The first-time and returning flows can be inspected in all 11 languages.
-Preview mode clearly says submissions are not saved. The production URL without
-the query parameter continues to use the original questionnaire until migration.
+### Independent acceptance evidence
 
-## One unavoidable user action: additive Supabase migration
-The RSSL project is **not** connected to the database management tools available
-in ChatGPT. Only its other Supabase projects are connected, so the database SQL
-cannot be executed from the current integration.
+- The read-only schema preflight confirmed all five new columns are present.
+- [GitHub live V2 smoke run](https://github.com/angussullivan/RSSL-laundry/actions/runs/44288382607):
+  two synthetic branch records inserted using the public publishable key,
+  server-read back with correct values, then deleted and confirmed absent.
+- [Final privacy and legacy run](https://github.com/angussullivan/RSSL-laundry/actions/runs/44289327189):
+  first-time V2, returning V2, and legacy V1 public INSERTs accepted; anonymous
+  SELECT returned denied/empty; all three synthetic records deleted.
+- [GitHub quality checks](https://github.com/angussullivan/RSSL-laundry/actions/workflows/rssl-quality-checks.yml):
+  11 language packs, branching, old queued-client handling, offline retry,
+  survey responsiveness and weekly reporting calculations passed.
+- The GitHub Pages build for the V2 survey completed successfully.
 
-1. In your Supabase project open:
-   https://supabase.com/dashboard/project/mfsdnfhoifahvlsjzzxf/sql/new
-2. Open the migration SQL prepared in your GitHub repository:
-   https://github.com/angussullivan/RSSL-laundry/blob/main/survey/ACQUISITION_V2_MIGRATION.sql
-3. Copy the SQL, paste into the RSSL SQL Editor, and press Run.
-4. Verify the final query returns five new rows for the new columns. Do not
-   modify or delete existing records.
-5. Tell ChatGPT: **"RSSL migration done"**, so it can verify the schema remotely
-   through the read-only preflight and enable the production flag.
-   Never paste the `sb_secret_` key here.
+The smoke tests prove REST insert/readback and security behaviour, not
+human review of all translations or visual appearance on the physical tablet.
 
-The migration is additive and idempotent. It intentionally leaves legacy RLS
-policy and checks unchanged. Verify browser INSERTs after the migration
-before relying on the new acquisition fields.
+## One remaining operational task: update private Google Apps Script
 
-## After migration — controlled production activation
-A. Change the `survey/index.html` feature gate to
-   `const ACQUISITION_V2_ENABLED = true;` (ChatGPT can do this once the
-   user confirms the migration; no need to edit this yourself).
-B. Test a complete *first-time* survey in one non-English language and verify
-   all five new columns are stored correctly in Supabase.
-C. Test a complete *returning* survey and verify acquisition-only fields are null.
-D. Verify a previously queued V1 response still inserts without the extra fields.
-E. Update your **existing** private Google Apps Script editor from the GitHub
-   source at:
-   https://raw.githubusercontent.com/angussullivan/RSSL-laundry/main/scripts/RSSL_Weekly_Email_Apps_Script.gs
-   with `const RSSL_ACQUISITION_V2_REPORT = true;` before copying.
-   Your Apps Script does NOT automatically sync from GitHub.
-   The `RSSL_SUPABASE_SECRET_KEY` Script Property remains unchanged.
-F. Run `sendTestReportNow` and check the received Gmail report; it should now
-   include acquisition source, decision reason and traveller breakdown.
-G. The existing Monday near-6am trigger **continues working**; do not create
-   duplicate triggers or change the schedule.
+**The currently installed Monday ~06:00 Sydney trigger continues to run**.
+It was configured earlier by the owner and does not need reinstalling.
+However, it runs the source saved in the owner's Google Apps Script editor,
+which does **not** update when the GitHub code changes.
+
+The complete enhanced reporting script is:
+https://raw.githubusercontent.com/angussullivan/RSSL-laundry/main/scripts/RSSL_Weekly_Email_Apps_Script.gs
+
+The updated source has `RSSL_ACQUISITION_V2_REPORT = true` and sends additional
+breakdowns for:
+- First-time acquisition channels, separating hotel/Airbnb and Apple Maps.
+- Most important first-time purchase-decision reason.
+- Nearby resident/worker versus accommodation guest or visitor.
+- Survey language selected (not citizenship).
+- Six-week benchmark with sample counts.
+- Returning V2 customers' satisfaction, **not mixed with V1 all-customer
+  satisfaction scores**.
+
+**Owner action:** in https://script.google.com/home open the existing
+`RSSL Weekly Customer Insights` project, replace `Code.gs` with the whole
+updated source, save, run `sendTestReportNow`, and check the received message.
+The original `RSSL_SUPABASE_SECRET_KEY` Script Property remains valid.
+Do **not** rerun `installMondaySchedule`; doing so is unnecessary.
+
+Until the owner updates this script, the already-authorised Gmail report
+continues its prior metrics and approximately 06:00 Monday schedule.
 
 ## Rollback
-If the migrated database is healthy but V2 reports or website fail:
-- Switch `ACQUISITION_V2_ENABLED` back to false; **do not drop new columns**.
-- Switch `RSSL_ACQUISITION_V2_REPORT` back to false in the Apps Script.
-- Keep V2 records already collected; they remain compatible with the old
-  core fields. Old V1 queued records are still valid.
-- Re-run existing GitHub QA before redeploying.
 
-## Relevant tests
-- `node survey/test_kiosk.js` — preexisting customer, offline and data integrity.
-- `node survey/test_acquisition_v2.js` — 11 languages, conditional routing,
-  channel mapping, correct columns, legacy compatibility, and preview no-write.
-- `node survey/test_sw.js` — offline service worker and logo caching.
-- `node scripts/test_apps_script.js` — Gmail reporting, six-week trend,
-  Sydney time zones, 6am trigger, and V2 acquisition breakdowns.
-- `python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py'` —
-  legacy reporting calculations.
+- If the V2 customer survey malfunctions, change
+  `ACQUISITION_V2_ENABLED` to false in `survey/index.html`,
+  publish and bump the service worker cache. Do **not** drop migration
+  columns or delete V2 responses.
+- If enhanced Gmail report malfunctions, set
+  `RSSL_ACQUISITION_V2_REPORT` to false in the *private* `Code.gs`
+  and rerun `sendTestReportNow`. Leave the Monday trigger in place.
+- Never expose `sb_secret_` to the public site.
 
-## Careful interpretation
-- A response is not a verified unique *paying* customer; voluntary sampling
-  introduces selection bias.
-- Google Ads directions are not proof of an incremental purchase. Compare
-  surveys with actual Paymate transactions, energy use and ad spend.
-- Google Maps may be organic or paid; the survey cannot reliably distinguish
-  the two. Do not make paid-attribution claims from these answers.
-- Language chosen is a preference, not ethnicity or nationality.
-- Early six-week averages include weeks before the survey started.
-- Weekly reports still group by server `submitted_at`; delayed offline uploads
-  may fall into a later week's reporting window. The client also stores
-  `answered_at` to permit future auditing of delayed responses.
+## Interpret results carefully
+
+- A survey respondent is not necessarily a unique paying machine customer.
+- Direction requests are not paid customer conversions.
+- Google discovery may be organic or paid; this survey cannot prove ad lift.
+- Sample sizes must accompany breakdowns, especially during rollout.
+- Six-week volume averages initially include weeks before launch.
+- Delayed offline responses may fall in a later submitted-at reporting week;
+  the client records `answered_at` for future audit.
