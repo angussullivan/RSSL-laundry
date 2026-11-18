@@ -6,6 +6,7 @@ on:
       - 'survey/index.html'
       - 'survey/sw.js'
       - 'survey/test_kiosk.js'
+      - 'survey/test_acquisition_v2.js'
       - 'survey/test_sw.js'
       - 'scripts/rssl_weekly_report.py'
       - 'scripts/test_rssl_weekly_report.py'
@@ -32,6 +33,7 @@ jobs:
       - name: Test survey JavaScript, translation data and offline queue
         run: |
           node survey/test_kiosk.js
+          node survey/test_acquisition_v2.js
           node survey/test_sw.js
       - name: Validate Google Apps Script Monday email sender and DST boundaries
         run: node scripts/test_apps_script.js
