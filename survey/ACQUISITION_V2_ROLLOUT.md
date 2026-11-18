@@ -20,8 +20,33 @@
 An authenticated, **read-only GitHub Actions** schema preflight on 18 November 2026 confirmed these production columns:
 `answered_at, discovery_source, experience, google_today, improvement, submission_id, submitted_at, visit_type`.
 
-**The five new V2 columns are NOT yet in the live Supabase database.**
-This is why V2 is **not active** for customer responses. The existing V1 customer survey remains live and functional. V2-preview submissions are never stored.
+**The five new V2 columns have now been added to the live Supabase database.**
+The current blocker is missing anonymous INSERT privilege (HTTP 401 / 42501); this is why V2 remains off. The existing V1 customer survey remains live and functional. V2-preview submissions are never stored.
+
+## Database access check after migration — 18 November 2026
+
+The five V2 columns **were confirmed present** in a fresh, read-only Supabase
+preflight. A subsequent live integration attempt (browser publishable key,
+synthetic record, no personal data) returned:
+
+`HTTP 401 / Postgres 42501: permission denied for table rssl_customer_surveys`
+
+Supabase explicitly asked for `GRANT INSERT ON public.rssl_customer_surveys
+TO anon;`. This is a database **table privilege**, separate from the RLS
+row policy; the new columns were successfully created.
+
+**Smallest safe fix (user SQL Editor action):**
+Run [ACQUISITION_V2_ANON_INSERT_FIX.sql](ACQUISITION_V2_ANON_INSERT_FIX.sql)
+in the RSSL Supabase project. It enforces RLS and gives anonymous browser
+clients INSERT privilege **only**, never SELECT/UPDATE/DELETE. It also
+displays the resulting grants and policies for inspection.
+
+Then rerun the live acceptance test (via GitHub Actions) and verify the
+two synthetic inserts, readbacks and deletion succeed. Keep V2 production
+disabled until test success. If the next failure is RLS-policy-specific,
+inspect the policies before adding or broadening any RLS rule.
+
+**Do not publish the server secret or put it in the tablet.**
 
 ## SAFE PREVIEW NOW (no database writes)
 https://www.reservoirlaundry.com.au/survey/?preview_v2=1
