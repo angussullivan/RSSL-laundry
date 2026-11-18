@@ -1,5 +1,5 @@
 /* Network-first, single-file RSSL kiosk shell. Only the survey scope is cached. */
-const CACHE = 'rssl-kiosk-v4';
+const CACHE = 'rssl-kiosk-v5';
 const SHELL = ['./index.html', './icon.svg', './manifest.webmanifest', '../IMG_7178.jpeg'];
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 const LOGO_PATH = new URL('../IMG_7178.jpeg',self.registration.scope).pathname;
