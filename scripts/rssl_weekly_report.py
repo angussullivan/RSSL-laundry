@@ -199,7 +199,7 @@ def send_email(label, text, html_body):
     }).encode("utf-8")
     req = urllib.request.Request("https://api.resend.com/emails", data=payload, method="POST",
        headers={"Authorization": "Bearer " + mail_key, "Content-Type": "application/json",
-                "Idempotency-Key": "rssl-weekly-" + label.replace(" ", "-")})
+                "Idempotency-Key": "rssl-weekly-" + label.encode("ascii", "ignore").decode("ascii").replace(" ", "-")})
     try:
         with urllib.request.urlopen(req, timeout=30) as res:
             result = json.load(res)
