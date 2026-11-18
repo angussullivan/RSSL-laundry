@@ -126,9 +126,9 @@ functions.sendWeeklyRsslReport();
 assert.equal(sent.length,after,'Duplicate weekly send suppressed');
 assert.ok(props.get('RSSL_LAST_SENT_WEEK'));
 // Simulate the upgraded backend without changing production's safe-off flag.
-const v2Source=source.replace('const RSSL_ACQUISITION_V2_REPORT = false;',
-                              'const RSSL_ACQUISITION_V2_REPORT = true;');
-assert.notEqual(v2Source,source,'V2 reporting flag can be enabled after migration');
+assert.ok(source.includes('const RSSL_ACQUISITION_V2_REPORT = true;'),
+  'Acquisition V2 reporting is enabled after live schema verification');
+const v2Source=source;
 const v2=new Function('PropertiesService','Utilities','MailApp','UrlFetchApp',
   'Session','LockService','ScriptApp',v2Source+
   '\nreturn {rsslAcquisitionDetails_,rsslBuildReport_};')
