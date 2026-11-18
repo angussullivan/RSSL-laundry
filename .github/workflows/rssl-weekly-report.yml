@@ -31,7 +31,7 @@ jobs:
           python-version: '3.12'
       - name: Generate report and send email
         env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.RSSL_SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.RSSL_SUPABASE_SECRET_KEY }}
           RSSL_GMAIL_APP_PASSWORD: ${{ secrets.RSSL_GMAIL_APP_PASSWORD }}
           RSSL_REPORT_TO: ${{ secrets.RSSL_REPORT_TO }}
         run: |
