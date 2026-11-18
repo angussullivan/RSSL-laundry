@@ -37,8 +37,8 @@ account owner.
    `installMondaySchedule` and click **Run** once. This safely replaces any
    pre-existing trigger for `sendWeeklyRsslReport`.
    It creates an installable Monday morning trigger in the
-   `Australia/Sydney` time zone, nominally **9:15am**.
-   Google Apps Script schedules `nearMinute(15)` within a ±15-minute window;
+   `Australia/Sydney` time zone, nominally **6:00am**.
+   Google Apps Script schedules `nearMinute(0)` within a ±15-minute window;
    it **does not guarantee an exact delivery minute**.
 7. Optionally, verify the trigger under the clock icon **Triggers** on the
    left; it should show `sendWeeklyRsslReport`, Time-driven, Weekly, Monday.
@@ -51,6 +51,9 @@ account owner.
   **Apps Script Properties**, not the kiosk's browser key.
 - Sends aggregate first-time/returning customer, Google Maps/Search discovery,
   Google usage today, satisfaction and improvement metrics.
+- Each weekly report now compares **Last week**, **Previous week** and a **6-week average / benchmark**.
+- The benchmark uses the six completed Monday–Sunday weeks ending the preceding Sunday. Survey counts are averaged per calendar week (including zero-response weeks). Percentages are pooled across all answered surveys in the six weeks (response-weighted). The email states the dates and sample size.
+- While the kiosk is new, the six-week mean includes weeks before launch and may appear artificially low.
 - Differences in customer language selection never affect stored codes;
   the database is still interpreted in English.
 - Send permission uses **MailApp**, which can send mail as the signed-in
