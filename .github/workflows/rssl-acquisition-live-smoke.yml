@@ -1,4 +1,5 @@
 name: RSSL V2 Live Schema and Submission Test
+# Retest after verified anonymous INSERT grant on 18 Nov 2026
 
 on:
   push:
