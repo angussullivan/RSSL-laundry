@@ -1,0 +1,36 @@
+name: RSSL One-Time Gmail Delivery Test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rssl-email-delivery-test-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rssl-weekly-report
+  cancel-in-progress: false
+
+jobs:
+  verify-and-send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout RSSL reporting code
+        uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify kiosk and report regression tests
+        run: |
+          node survey/test_kiosk.js
+          node survey/test_sw.js
+          python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py'
+      - name: Send real RSSL weekly report via Gmail
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.RSSL_SUPABASE_SECRET_KEY }}
+          RSSL_GMAIL_APP_PASSWORD: ${{ secrets.RSSL_GMAIL_APP_PASSWORD }}
+          RSSL_REPORT_TO: ${{ secrets.RSSL_REPORT_TO }}
+        run: python scripts/rssl_weekly_report.py
