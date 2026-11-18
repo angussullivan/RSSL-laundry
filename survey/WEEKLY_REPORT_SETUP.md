@@ -1,66 +1,46 @@
-# RSSL weekly customer survey email reporting
+# RSSL Weekly Customer Insights — operational setup
 
-This workflow runs **Mondays at 9:17am Australia/Sydney** and sends the report
-**from the Gmail account of the recipient**, currently angussullivan@gmail.com,
-using Gmail SMTP. GitHub hosts the RSSL website, while the automation reads
-survey responses from the separate Supabase database. The automated email
-is NOT active until the necessary private credentials are saved in GitHub
-Actions Secrets and a live workflow test succeeds.
+**Email status:** The survey data and report calculations have been verified.
+GitHub's Gmail SMTP delivery failed with `SMTPServerDisconnected` on both
+465 and 587, so the scheduled GitHub email workflow has been disabled.
+The **replacement is Google Apps Script**, which emails from
+**angussullivan@gmail.com** using Google's Mail service, without SMTP.
 
-## Set up the two remaining GitHub Actions Secrets
+## Activate and test
 
-In the existing repository go to **Settings > Secrets and variables > Actions
-> New repository secret**.
+Follow the maintained step-by-step guide:
 
-1. **`RSSL_REPORT_TO`** — the sender and recipient Gmail address.
-   This has already been configured.
-2. **`RSSL_GMAIL_APP_PASSWORD`** — create at
-   <https://myaccount.google.com/apppasswords> while logged in to the
-   `RSSL_REPORT_TO` Gmail account. The account must have 2-Step
-   Verification enabled and be eligible for app passwords. Give the password
-   a name such as "RSSL Weekly Survey". Copy the generated 16-character
-   app password and paste it **only into the GitHub secret value**.
-   Do **not** enter the ordinary Google password. Do not paste the
-   app password into ChatGPT or any publicly hosted code.
-3. **`RSSL_SUPABASE_SECRET_KEY`** — copy the modern `sb_secret_...` key from the RSSL project's Supabase Settings > API Keys > Secret keys section. Do not use the legacy service_role key.
-   Store it only as the GitHub Actions secret, never in this public repository
-   or the survey website. The browser's publishable key cannot read data
-   because customer data is protected by RLS.
+[Set up Google Apps Script and send a test email](GMAIL_APPS_SCRIPT_SETUP.md).
 
-**No Resend API key, Resend email address, or `RSSL_REPORT_FROM` secret
-is required**. Gmail SMTP sends the report as
-`RSSL Customer Insights <angussullivan@gmail.com>`.
+Source file (public code, no secret):
+[`scripts/RSSL_Weekly_Email_Apps_Script.gs`](../scripts/RSSL_Weekly_Email_Apps_Script.gs)
 
-## Test before trusting the weekly schedule
+Until the owner creates and authorises the Apps Script project, **no weekly
+automated email is active**. The user can still run the
+`RSSL Customer Insights — Manual Database Preview` GitHub workflow for
+a read-only dry-run report, but it will not send email.
 
-Go to **Actions > RSSL Weekly Customer Insights Email > Run workflow**.
-Leave `dry_run=true` for a report preview (no email).
-Then rerun with `dry_run=false` and check Gmail inbox/Sent to verify delivery.
+## Summary of the report
 
-Weekly reports compare previous complete Monday–Sunday (Sydney dates)
-against the week before. Metrics include total responses; first-time versus
-returning customer shares; first discovery via Google Maps, Google Search,
-walking past, recommendations; Google use on visit day; satisfaction; and
-top requested improvements. It distinguishes new visitors' Google discovery
-from repeat visitors' Google discovery.
+- Total weekly survey responses, this week versus prior week.
+- First-time customers and new visitors who originally discovered RSSL
+  through Google Maps or Search.
+- Returning visitors who originally discovered RSSL through Google.
+- Walking past, personal recommendation and Google use today.
+- Good/Excellent customer satisfaction and customer improvement requests.
+- Clear caveats that self-reported Google discovery is **not** proof of a
+  paid ad producing an incremental paying customer.
 
-The script logs only aggregated values, not individual survey responses.
-No raw customer records are committed to GitHub.
+Reports use Sydney-local Monday–Sunday calendar boundaries. The installable
+Google trigger runs Monday mornings, usually near **9:15am Sydney time**,
+with Google's permitted time variance.
 
-Customer survey participation is voluntary and may not represent all paying
-customers; self-reported Google discovery is not proof that advertising
-caused a purchase. This report does not currently include verified machine
-revenue or Google Ads expenditure.
+## Security
 
-## Security and reliability
-
-Google says app passwords are less secure than Google's OAuth sign-in and
-are not available on all accounts. Keep GitHub repository access limited to
-trusted administrators. You can revoke the app password at any time in
-Google Account security settings. If the regular Google account password
-changes, the app password may be revoked, and you must update the
-GitHub secret.
-
-GitHub scheduled workflows can occasionally be delayed or skipped during
-GitHub service load. Check the Actions page for failures. This setup is a
-GitHub scheduled workflow, not a ChatGPT automation.
+- The kiosk's browser contains only the public Supabase **publishable** key.
+- Google Apps Script stores the private Supabase `sb_secret_...` key in
+  **Script Properties**. Do not paste it into the script file or public GitHub.
+- The MailApp authorisation permits outgoing email, not mailbox reading.
+- Only the Gmail account owner should edit or authorise the Apps Script.
+- After the test email succeeds, remove the redundant Gmail App Password
+  previously created for the unsuccessful GitHub SMTP experiment.
