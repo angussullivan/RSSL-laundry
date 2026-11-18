@@ -139,7 +139,7 @@ function rsslMetric_(rows, field, selected) {
 }
 function rsslGoogleDiscovery_(rows,visitType) {
   const eligible=rows.filter(r=>r.visit_type===visitType &&
-    r.discovery_source!==null && r.discovery_source!==undefined);
+    r.discovery_source!==null && r.discovery_source!==undefined && r.discovery_source!=='');
   const count=eligible.filter(r=>r.discovery_source==='google_maps' ||
                                    r.discovery_source==='google_search').length;
   return eligible.length ? count+' / '+eligible.length+' ('+rsslPct_(count,eligible.length)+')'
