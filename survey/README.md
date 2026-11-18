@@ -52,28 +52,34 @@ Screen readability can vary with Android display zoom, font scaling and
 browser toolbar visibility. Test the shortest/longest translated question
 on the actual hardware before leaving the kiosk unattended.
 
-## Acquisition Survey V2 — safely staged (not yet active)
+## Acquisition Survey V2 — LIVE (18 November 2026)
 
-On 18 November 2026, we added the complete 11-language acquisition upgrade behind
-`const ACQUISITION_V2_ENABLED = false` in `index.html`.
+The live survey uses the conditional five-question design in all 11 languages.
+The launch followed a read-only Supabase schema check, anon INSERT grant,
+and successful real database tests for both V2 branches **and a legacy V1 row**.
+All synthetic test records were confirmed removed; anonymous SELECT was blocked.
 
-- **Live survey** remains the original five questions and original Supabase payload.
-- **Non-saving V2 preview:** https://www.reservoirlaundry.com.au/survey/?preview_v2=1
-- **V2 first-timer flow:** initial discovery, Google navigation, decision driver,
-  local resident/worker versus traveller.
-- **V2 returning-customer flow:** initial discovery, Google navigation,
-  original experience and improvement questions.
-- **Prepared additive schema migration:** [ACQUISITION_V2_MIGRATION.sql](ACQUISITION_V2_MIGRATION.sql).
-- **Deployment steps:** [ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md).
-- **11-language V2 tests:** `node survey/test_acquisition_v2.js`.
-- **Gmail reporting:** New acquisition metrics are staged in
-  `scripts/RSSL_Weekly_Email_Apps_Script.gs` behind
-  `RSSL_ACQUISITION_V2_REPORT=false`. The private Apps Script does not sync
-  automatically from GitHub.
+- **Every customer:** first/repeat, initial discovery (including accommodation
+  hosts/hotels and Apple Maps) and Google use today.
+- **First-time or unknown:** principal reason for choosing the laundry and
+  nearby resident/worker versus hotel/Airbnb guest/visitor.
+- **Returning:** original experience and improvement questions.
+- **Data:** five additive nullable columns (`choice_reason`, `customer_context`,
+  `discovery_detail`, `survey_language`, `survey_version`).
+- Accommodation referrals and Apple Maps still save legacy
+  `discovery_source='other'` plus a detailed `discovery_detail` code;
+  historical source comparisons remain valid.
+- Old queued submissions with no V2 fields remain accepted.
 
-A read-only schema preflight confirmed that the live RSSL database does **not**
-yet contain V2 fields. Do not enable either V2 flag until SQL migration, real
-insertion test and the updated Apps Script are ready.
+**Weekly report handoff remains:** GitHub's public
+`scripts/RSSL_Weekly_Email_Apps_Script.gs` has the V2 reporting changes
+enabled. The privately hosted Google Apps Script **does not sync from GitHub**.
+The owner must paste the updated complete script into the existing `Code.gs`
+and run `sendTestReportNow` to check the new acquisition sections.
+The Monday ~06:00 Sydney trigger remains installed; it need not be recreated.
+
+Rollout, testing and rollback details:
+[ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md).
 
 ## When the internet is down
 - A previously loaded survey can reopen via the service-worker cache.
