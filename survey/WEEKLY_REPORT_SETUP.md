@@ -1,44 +1,68 @@
 # RSSL weekly customer survey email reporting
 
-This workflow generates a real report from the private Supabase table every
-Monday at **9:17am Australia/Sydney** and emails it automatically. It is not
-fully operational until the four repository secrets below have been configured.
-The current project does not grant anonymous SELECT access; do not weaken its RLS.
+This workflow runs **Mondays at 9:17am Australia/Sydney** and sends the report
+**from the Gmail account of the recipient**, currently angussullivan@gmail.com,
+using Gmail SMTP. GitHub hosts the RSSL website, while the automation reads
+survey responses from the separate Supabase database. The automated email
+is NOT active until the necessary private credentials are saved in GitHub
+Actions Secrets and a live workflow test succeeds.
 
-## Setup
+## Set up the two remaining GitHub Actions Secrets
 
-Go to GitHub repository **Settings > Secrets and variables > Actions >
-New repository secret** and create:
+In the existing repository go to **Settings > Secrets and variables > Actions
+> New repository secret**.
 
-- `RSSL_SUPABASE_SERVICE_ROLE_KEY` — the new **RSSL Customer Survey** project's
-  Supabase server-side `service_role` key (or a Supabase secret key with adequate
-  SELECT permission). Find it in that project's API Keys screen. This key must
-  *never* be used in the public kiosk website or committed to source control.
-- `RSSL_RESEND_API_KEY` — a Resend API key with sending permission. Create it
-  in the Resend dashboard. Never commit it to source control.
-- `RSSL_REPORT_TO` — intended recipient's email.
-- `RSSL_REPORT_FROM` — e.g. `RSSL Customer Insights <reports@your-verified-domain>`.
-  The domain must be verified in the sender's Resend account.
+1. **`RSSL_REPORT_TO`** — the sender and recipient Gmail address.
+   This has already been configured.
+2. **`RSSL_GMAIL_APP_PASSWORD`** — create at
+   <https://myaccount.google.com/apppasswords> while logged in to the
+   `RSSL_REPORT_TO` Gmail account. The account must have 2-Step
+   Verification enabled and be eligible for app passwords. Give the password
+   a name such as "RSSL Weekly Survey". Copy the generated 16-character
+   app password and paste it **only into the GitHub secret value**.
+   Do **not** enter the ordinary Google password. Do not paste the
+   app password into ChatGPT or any publicly hosted code.
+3. **`RSSL_SUPABASE_SERVICE_ROLE_KEY`** — obtain the new RSSL Customer Survey
+   project's `service_role` key in Supabase Settings > API Keys
+   (or an equivalent server-side key with SELECT permissions).
+   Store it only as the GitHub Actions secret, never in this public repository
+   or the survey website. The browser's publishable key cannot read data
+   because customer data is protected by RLS.
 
-After setting secrets go to repository **Actions > RSSL Weekly Customer Insights
-Email > Run workflow**. Leave `dry_run=true` to inspect the report in job logs
-without sending, then run with `dry_run=false` for a live delivery test.
-Scheduled reports use the last complete Monday–Sunday in Sydney time and
-run every Monday at 9:17am local (including daylight-saving changes).
+**No Resend API key, Resend email address, or `RSSL_REPORT_FROM` secret
+is required**. Gmail SMTP sends the report as
+`RSSL Customer Insights <angussullivan@gmail.com>`.
 
-The job uses a server-only authenticated REST request to Supabase with RLS
-unchanged, aggregates anonymous response counts and sends through Resend.
-It never pushes raw responses to GitHub or to the public website.
+## Test before trusting the weekly schedule
 
-**Note:** Delete the owner's setup/test record from the table before the first
-report if it is not a genuine customer response. This report DOES NOT
-automatically pull laundry machine revenue or Google Ads expenditure; those
-require additional connected data sources.
+Go to **Actions > RSSL Weekly Customer Insights Email > Run workflow**.
+Leave `dry_run=true` for a report preview (no email).
+Then rerun with `dry_run=false` and check Gmail inbox/Sent to verify delivery.
 
-Weekly metrics: response counts, first-time visits, discovery source, Google
-usage on visit day, satisfaction, improvement types and previous-week comparisons.
-The report also states sampling limitations and avoids treating Google discovery
-as proof that an ad produced a paying customer.
+Weekly reports compare previous complete Monday–Sunday (Sydney dates)
+against the week before. Metrics include total responses; first-time versus
+returning customer shares; first discovery via Google Maps, Google Search,
+walking past, recommendations; Google use on visit day; satisfaction; and
+top requested improvements. It distinguishes new visitors' Google discovery
+from repeat visitors' Google discovery.
 
-GitHub Actions scheduled workflows can be delayed or skipped by GitHub service
-load. Monitor the Actions page for delivery failures.
+The script logs only aggregated values, not individual survey responses.
+No raw customer records are committed to GitHub.
+
+Customer survey participation is voluntary and may not represent all paying
+customers; self-reported Google discovery is not proof that advertising
+caused a purchase. This report does not currently include verified machine
+revenue or Google Ads expenditure.
+
+## Security and reliability
+
+Google says app passwords are less secure than Google's OAuth sign-in and
+are not available on all accounts. Keep GitHub repository access limited to
+trusted administrators. You can revoke the app password at any time in
+Google Account security settings. If the regular Google account password
+changes, the app password may be revoked, and you must update the
+GitHub secret.
+
+GitHub scheduled workflows can occasionally be delayed or skipped during
+GitHub service load. Check the Actions page for failures. This setup is a
+GitHub scheduled workflow, not a ChatGPT automation.
