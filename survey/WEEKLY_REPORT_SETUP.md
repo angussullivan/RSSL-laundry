@@ -34,18 +34,24 @@ Reports use Sydney-local Monday–Sunday calendar boundaries. The installable
 Google trigger runs Monday mornings, usually near **6:00am Sydney time**,
 with Google's permitted time variance.
 
-## Acquisition Survey V2 (staged, not yet live)
+## Acquisition Survey V2 — live survey, Gmail report handoff pending
 
-A redesigned five-question, 11-language acquisition survey and corresponding
-Google Apps Script reporting code are committed to GitHub, but safely disabled
-until its additive Supabase migration is applied. See
-[ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md).
-After migration, enable the report flag in the source and copy updated code
-into the owner-controlled Apps Script editor; GitHub does not sync it.
+The five-question conditional survey is live in all eleven languages.
+The RSSL Supabase migration and public browser write tests have passed.
+See [ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md).
 
-The existing email includes the six-week historical comparison. The V2 edition
-adds first-time channel, reason for choice, local-versus-visitor and language
-breakdowns with sample sizes.
+The GitHub source at
+[`scripts/RSSL_Weekly_Email_Apps_Script.gs`](../scripts/RSSL_Weekly_Email_Apps_Script.gs)
+now enables acquisition reporting: first-time discovery channels, selection
+reasons, nearby residents versus visitors, and language used. It preserves
+six-week sample-size comparisons and isolates V2 returning satisfaction from
+older all-customer satisfaction metrics.
+
+**The private Google Apps Script does not automatically sync from GitHub.**
+The owner must replace `Code.gs` with the updated source, save, and run
+`sendTestReportNow` once. The existing Monday ~06:00 trigger is installed
+and does not need to be recreated. Until then, the scheduled reports use
+the previous metrics.
 
 ## Security
 
