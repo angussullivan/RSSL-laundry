@@ -8,7 +8,7 @@ async function main() {
   const events = {};
   const deleted = [];
   const stored = new Map();
-  const oldKeys = ['rssl-survey-app-v1','rssl-kiosk-v2','unrelated-site-cache'];
+  const oldKeys = ['rssl-survey-app-v1','rssl-kiosk-v3','unrelated-site-cache'];
   let online = true, hits=0;
   const cache = {
     async addAll(paths){for(const p of paths)stored.set(p, {ok:true,text:'cached '+p});},
@@ -16,7 +16,7 @@ async function main() {
     async put(req,response){stored.set(typeof req==='string'?req:req.url,response);},
   };
   const caches = {
-    async open(key){assert.equal(key,'rssl-kiosk-v3');return cache;},
+    async open(key){assert.equal(key,'rssl-kiosk-v4');return cache;},
     async keys(){return [...oldKeys];},
     async delete(key){deleted.push(key);return true;},
   };
@@ -39,10 +39,11 @@ async function main() {
   events.install({waitUntil(p){promise=p;}});
   await promise;
   assert.ok(stored.has('./index.html'),'Kiosk entry point cached');
+  assert.ok(stored.has('../IMG_7178.jpeg'),'Business logo cached for offline use');
 
   events.activate({waitUntil(p){promise=p;}});
   await promise;
-  assert.deepEqual(deleted.sort(),['rssl-kiosk-v2','rssl-survey-app-v1'],
+  assert.deepEqual(deleted.sort(),['rssl-kiosk-v3','rssl-survey-app-v1'],
     'Only survey-owned old caches are deleted');
 
   function navigation(url){
@@ -65,6 +66,6 @@ async function main() {
     respondWith(){outsideHandled=true;},
   });
   assert.equal(outsideHandled,false,'Service worker cannot control the main laundry homepage');
-  console.log('PASS: offline service worker install, cache upgrade, online refresh, offline reopen, path isolation');
+  console.log('PASS: offline service worker install, logo caching, cache upgrade, online refresh, offline reopen, path isolation');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
