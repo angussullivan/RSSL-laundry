@@ -37,5 +37,7 @@ jobs:
           node survey/test_sw.js
       - name: Validate Google Apps Script Monday email sender and DST boundaries
         run: node scripts/test_apps_script.js
+      - name: Compile live integration probes without sending data
+        run: python -m py_compile scripts/rssl_acquisition_smoke.py scripts/rssl_acquisition_preflight.py
       - name: Test legacy reporting calculations and Supabase reads
         run: python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py' -v
