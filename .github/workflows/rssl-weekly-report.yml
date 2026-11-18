@@ -32,9 +32,8 @@ jobs:
       - name: Generate report and send email
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.RSSL_SUPABASE_SERVICE_ROLE_KEY }}
-          RESEND_API_KEY: ${{ secrets.RSSL_RESEND_API_KEY }}
+          RSSL_GMAIL_APP_PASSWORD: ${{ secrets.RSSL_GMAIL_APP_PASSWORD }}
           RSSL_REPORT_TO: ${{ secrets.RSSL_REPORT_TO }}
-          RSSL_REPORT_FROM: ${{ secrets.RSSL_REPORT_FROM }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
             python scripts/rssl_weekly_report.py --dry-run
