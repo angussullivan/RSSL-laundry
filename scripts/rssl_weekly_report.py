@@ -115,6 +115,20 @@ def metric(rows, field, values):
     return (str(n) + " / " + str(d) + " (" + percent(n, d) + ")") if d else "No answers"
 
 
+def new_google_metric(rows):
+    first = [r for r in rows if r.get("visit_type") == "first"]
+    answered = [r for r in first if r.get("discovery_source") not in (None, "")]
+    n = sum(r.get("discovery_source") in ("google_maps", "google_search") for r in answered)
+    return str(n) + " / " + str(len(answered)) + " (" + percent(n, len(answered)) + ")" if answered else "No answers"
+
+
+def returning_google_metric(rows):
+    repeat = [r for r in rows if r.get("visit_type") == "repeat"]
+    answered = [r for r in repeat if r.get("discovery_source") not in (None, "")]
+    n = sum(r.get("discovery_source") in ("google_maps", "google_search") for r in answered)
+    return str(n) + " / " + str(len(answered)) + " (" + percent(n, len(answered)) + ")" if answered else "No answers"
+
+
 def source_stats(rows):
     answered = valid(rows, "discovery_source")
     c = collections.Counter(answered)
@@ -144,6 +158,8 @@ def make_message(recent, older, start, end):
     rows = [
         ("Surveys received", str(len(recent)), str(len(older))),
         ("First-time visits", metric(recent, "visit_type", {"first"}), metric(older, "visit_type", {"first"})),
+        ("New visitors first discovering us via Google", new_google_metric(recent), new_google_metric(older)),
+        ("Returning visitors originally from Google", returning_google_metric(recent), returning_google_metric(older)),
         ("First heard via Google Maps", metric(recent, "discovery_source", {"google_maps"}), metric(older, "discovery_source", {"google_maps"})),
         ("First heard via Google Search", metric(recent, "discovery_source", {"google_search"}), metric(older, "discovery_source", {"google_search"})),
         ("First heard by walking past", metric(recent, "discovery_source", {"walk_by"}), metric(older, "discovery_source", {"walk_by"})),
