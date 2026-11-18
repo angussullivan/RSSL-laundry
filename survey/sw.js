@@ -1,7 +1,8 @@
 /* Network-first, single-file RSSL kiosk shell. Only the survey scope is cached. */
-const CACHE = 'rssl-kiosk-v3';
-const SHELL = ['./index.html', './icon.svg', './manifest.webmanifest'];
+const CACHE = 'rssl-kiosk-v4';
+const SHELL = ['./index.html', './icon.svg', './manifest.webmanifest', '../IMG_7178.jpeg'];
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
+const LOGO_PATH = new URL('../IMG_7178.jpeg',self.registration.scope).pathname;
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -25,7 +26,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (request.method !== 'GET' ||
       url.origin !== self.location.origin ||
-      !url.pathname.startsWith(SCOPE_PATH)) return;
+      !(url.pathname.startsWith(SCOPE_PATH) || url.pathname === LOGO_PATH)) return;
 
   event.respondWith(
     (async () => {
