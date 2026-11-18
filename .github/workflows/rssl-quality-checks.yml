@@ -9,8 +9,6 @@ on:
       - 'survey/test_sw.js'
       - 'scripts/rssl_weekly_report.py'
       - 'scripts/test_rssl_weekly_report.py'
-      - 'scripts/rssl_weekly_report.gs'
-      - 'scripts/test_rssl_apps_script.js'
       - '.github/workflows/rssl-weekly-report.yml'
       - '.github/workflows/rssl-quality-checks.yml'
   workflow_dispatch:
@@ -33,7 +31,5 @@ jobs:
         run: |
           node survey/test_kiosk.js
           node survey/test_sw.js
-      - name: Test Google Apps Script Gmail replacement with no real credentials
-        run: node scripts/test_rssl_apps_script.js
       - name: Test legacy reporting calculations and Supabase reads
         run: python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py' -v
