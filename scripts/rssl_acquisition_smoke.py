@@ -56,11 +56,15 @@ def request(method, key, url, payload=None):
 def filtered(id_):
     return URL + "?submission_id=eq." + urllib.parse.quote(id_) + "&select=*"
 
+# Only remove records whose INSERT actually succeeded.
+# Do not claim an uninserted record was cleaned up.
+created = []
 try:
     for index, record in enumerate(test_rows):
         status, _ = request("POST", CLIENT_KEY, URL, record)
         if status not in (200, 201, 204):
             raise RuntimeError("Unexpected public insert HTTP " + str(status))
+        created.append(record["submission_id"])
         print("Anonymous browser-style V2 INSERT for branch " + str(index + 1) + ": accepted")
         status, body = request("GET", SERVER_KEY, filtered(record["submission_id"]))
         found = json.loads(body)
@@ -74,10 +78,10 @@ try:
                 raise RuntimeError("Inserted row does not match field: " + key)
         print("V2 database code and branch fields: verified")
 finally:
-    for record in test_rows:
+    for submission_id in created:
         try:
-            request("DELETE", SERVER_KEY, filtered(record["submission_id"]))
-            status, body = request("GET", SERVER_KEY, filtered(record["submission_id"]))
+            request("DELETE", SERVER_KEY, filtered(submission_id))
+            status, body = request("GET", SERVER_KEY, filtered(submission_id))
             if status != 200 or json.loads(body):
                 raise RuntimeError("Test record was not removed")
             print("Synthetic test row removed and verified")
