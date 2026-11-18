@@ -213,10 +213,25 @@ function rsslBuildReport_(recent, older, sixWeek, periodLabel, isTest, benchmark
     rsslRatio_(sixWeek,'experience',['excellent','good'])
   ];
   metrics.forEach((metric, i) => metric.push(benchmarkMetrics[i]));
+  if (RSSL_ACQUISITION_V2_REPORT) {
+    // V1 asked all customers about experience; V2 asks returners only.
+    // Exclude V1 to avoid an invalid apples-to-oranges satisfaction trend.
+    const returning = rows => rows.filter(r =>
+      r.survey_version === 2 && r.visit_type === 'repeat');
+    metrics[9] = [
+      'Good or Excellent (returning customers, V2 only)',
+      rsslRatio_(returning(recent),'experience',['excellent','good']),
+      rsslRatio_(returning(older),'experience',['excellent','good']),
+      rsslRatio_(returning(sixWeek),'experience',['excellent','good'])
+    ];
+  }
+
   const benchmarkNote = '6-week period: ' + benchmarkPeriod +
     '. Survey volume is the average per calendar week (including zero-response weeks); ' +
     'percentages pool all answered responses across six weeks (a response-weighted average). ' +
     'The benchmark may be low while the survey is newly launched. ' +
+    (RSSL_ACQUISITION_V2_REPORT ?
+      'V2 returner satisfaction excludes legacy V1 scores because the populations differ. ' : '') +
     '6-week sample: ' + sixWeek.length + ' responses.';
   const sourceLabels = {
     google_maps:'Google Maps',google_search:'Google Search',walk_by:'Walking past',
