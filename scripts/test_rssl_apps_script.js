@@ -6,7 +6,7 @@ const vm=require('node:vm');
 const assert=require('node:assert/strict');
 const path=require('node:path');
 const src=fs.readFileSync(path.join(__dirname,'rssl_weekly_report.gs'),'utf8');
-assert.ok(src.includes('MailApp.sendEmail'), 'Google's send-only MailApp is used');
+assert.ok(src.includes('MailApp.sendEmail'), "Google's send-only MailApp is used");
 assert.ok(!src.includes('GmailApp.sendEmail'), 'Avoid full Gmail inbox access');
 assert.ok(!src.includes('sb_secret_') || src.includes("startsWith('sb_secret_')"),
   'No real private server key committed to GitHub');
