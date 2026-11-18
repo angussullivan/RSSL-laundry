@@ -88,6 +88,20 @@ assert.equal(sent.length,before+1);
 assert.equal(sent.at(-1).to,'angussullivan@gmail.com');
 assert.ok(sent.at(-1).subject.startsWith('[TEST · Current week to date]'));
 assert.ok(sent.at(-1).htmlBody.includes('Google Maps'));
+const seed = {
+  submission_id:'benchmark',submitted_at:'2026-11-12T02:00:00Z',visit_type:'first',
+  discovery_source:'google_maps',google_today:'maps',experience:'excellent',improvement:'nothing'
+};
+const weekReport=functions.rsslBuildReport_([seed],[seed],[seed,seed,seed,seed,seed,seed],
+  '2026-11-09 to 2026-11-15',false,'2026-10-05 to 2026-11-15');
+assert.ok(weekReport.body.includes('Survey responses | 1 | 1 | 1.0 per week'),
+  '6-week response count is averaged over six calendar weeks');
+assert.ok(weekReport.body.includes('6-week sample: 6 responses.'),
+  '6-week pooled denominator and reporting window disclosed');
+assert.ok(weekReport.htmlBody.includes('6-week average / benchmark'),
+  'Email contains a six-week comparison column');
+assert.ok(sent.at(-1).htmlBody.includes('6-week average / benchmark'),
+  'Live test email contains the six-week benchmark');
 assert.equal(requests.length,2);
 for(const call of requests){
   assert.ok(call.url.includes('/rest/v1/rssl_customer_surveys?'));
@@ -102,8 +116,8 @@ assert.equal(triggers.length,1,'Installing twice creates only one weekly trigger
 assert.equal(triggers[0].handler,'sendWeeklyRsslReport');
 assert.equal(triggers[0].everyWeeks,1);
 assert.equal(triggers[0].onWeekDay,'MONDAY');
-assert.equal(triggers[0].hour,9);
-assert.equal(triggers[0].minute,15);
+assert.equal(triggers[0].hour,6);
+assert.equal(triggers[0].minute,0);
 assert.equal(triggers[0].timezone,'Australia/Sydney');
 
 functions.sendWeeklyRsslReport();
@@ -111,4 +125,4 @@ const after=sent.length;
 functions.sendWeeklyRsslReport();
 assert.equal(sent.length,after,'Duplicate weekly send suppressed');
 assert.ok(props.get('RSSL_LAST_SENT_WEEK'));
-console.log('PASS: Apps Script Australian DST, private Supabase key, counts, Google MailApp send, live-test mode, Monday trigger, no duplicate sends');
+console.log('PASS: 6-week average, pooled rates, 6am Monday trigger, DST, Supabase and Gmail, duplicate suppression');
