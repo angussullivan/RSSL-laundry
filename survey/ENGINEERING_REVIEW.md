@@ -17,9 +17,22 @@
   offline reopening after an initial online visit.
 - Pending responses are preserved locally until the server confirms receipt,
   and are retried on reconnection and at a 30-second interval.
-- A separate GitHub Actions workflow reads aggregated responses from Supabase
-  using a private GitHub Secret and sends the report from the owner's Gmail
-  address. It is configured for Mondays 09:17 Australia/Sydney.
+- Google Apps Script (authorised as the owner) now reads Supabase and sends
+  weekly reports via MailApp every Monday near 06:00 Australia/Sydney.
+  Earlier GitHub SMTP schedules failed and were disabled.
+
+
+## Update: acquisition survey V2 staged
+
+The new 11-language, five-question conditional survey is built and tested.
+It is deliberately behind a disabled production flag until the RSSL database
+migration is applied. A read-only authenticated preflight found the current
+8-column schema and confirmed that the five V2 fields are absent.
+
+See [ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md) for the exact
+migration, staged preview, code gates, tests and rollback. The private Gmail
+Apps Script needs to be manually updated after migration; it is not synced
+from GitHub.
 
 ## Changes made in this review
 
@@ -70,8 +83,9 @@ passed after the changes, and GitHub Pages deployments have been successful.
 
 - No names, email addresses, phone numbers or free-text fields are collected.
 - The public website includes **only** the Supabase `sb_publishable_` key.
-- The `sb_secret_` key and the Gmail App Password are not in the public source
-  code; they are provided to the scheduled job from GitHub Actions Secrets.
+- Only the public `sb_publishable_` key is on the website. The private
+  `sb_secret_` value is stored in Google Apps Script Script Properties.
+  The earlier GitHub Gmail App Password is no longer used.
 - Source text is rendered through DOM `textContent`, not user-controlled HTML.
 - **Not independently verified:** the live Supabase RLS/grants, because this
   particular new project is not accessible through the connected Supabase
@@ -86,11 +100,7 @@ passed after the changes, and GitHub Pages deployments have been successful.
    open the latest live URL, use the language selector and complete a
    non-English survey. Confirm the response appears in Supabase with the
    original English-coded values. Check both portrait and landscape if used.
-2. **Live Gmail delivery:** The user's earlier green report workflow was a
-   `dry_run=true` test, not an SMTP send. Trigger
-   `RSSL Weekly Customer Insights Email` with `dry_run=false`, then
-   verify the message was received. The automated Python tests mock Gmail,
-   so cannot prove Google's login/delivery.
+2. **Gmail delivery:** Completed successfully through owner-authorised Google Apps Script, with the Gmail message verified in both Sent and Inbox. The weekly time-driven trigger has been installed.
 3. **Delete setup test data:** Remove the owner's earlier test response
    from the Supabase table before interpreting customer analytics.
 4. **Confirm RLS:** Verify anonymous users have INSERT only, not
