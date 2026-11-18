@@ -195,9 +195,9 @@ window.RSSL_CONFIG = {
 <script>
 (() => {
   'use strict';
-  // Switch to true ONLY AFTER applying the additive Supabase migration
-  // survey/ACQUISITION_V2_MIGRATION.sql and passing a live integration test.
-  const ACQUISITION_V2_ENABLED = false;
+  // V2 enabled after verified additive schema migration and live public-key
+  // INSERT/readback/cleanup tests for both first-time and returning branches.
+  const ACQUISITION_V2_ENABLED = true;
   // Non-writing preview of the new flow (safe before migration):
   // /survey/?preview_v2=1
   const ACQUISITION_PREVIEW = new URLSearchParams(window.location?.search || '').get('preview_v2') === '1';
