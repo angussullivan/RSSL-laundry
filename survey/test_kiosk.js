@@ -25,6 +25,34 @@ for (const [language, data] of Object.entries(packs)) {
 assert.ok(!html.includes('sb_secret_'), 'No server-side Supabase secret in public HTML');
 assert.ok(!html.includes('RSSL_GMAIL_APP_PASSWORD'), 'No Gmail App Password in public HTML');
 
+const styles = html.match(/<style>([\s\S]*?)<\/style>/);
+assert.ok(styles, 'Inline kiosk stylesheet is present');
+const css = styles[1];
+assert.ok(css.includes('Samsung Galaxy Tab A11+'), 'Device-specific tablet stylesheet exists');
+assert.ok(
+  css.includes('@media (min-width:540px) and (max-width:800px) and (orientation:portrait)'),
+  'Portrait tablet rules are present'
+);
+assert.ok(
+  css.includes('@media (orientation:landscape) and (min-width:800px) and (max-height:900px)'),
+  'Landscape 16:10 tablet rules are present'
+);
+assert.ok(
+  css.includes('@media (orientation:landscape) and (min-width:800px) and (max-height:650px)'),
+  'Constrained landscape screen rules are present'
+);
+assert.ok(
+  css.includes('.options{grid-template-columns:repeat(3,minmax(0,1fr))'),
+  'Short-wide viewports use three columns for long questions'
+);
+assert.ok(
+  css.includes('.language-grid{grid-template-columns:repeat(4,minmax(0,1fr))'),
+  'Landscape shows four columns of language tiles'
+);
+assert.ok(css.includes('env(safe-area-inset-bottom)'), 'Safe-area insets are considered');
+assert.ok(!html.includes('<select id="survey-language"'), 'No small dropdown on kiosk welcome');
+
+
 class Node {
   constructor(tag) {
     this.tag = tag; this.children = []; this.events = {};
@@ -150,6 +178,6 @@ async function test() {
   await settle();
   assert.equal(skipped.calls.length,0,'All-skipped response not inserted');
 
-  console.log('PASS: 11 language tiles, business logo, native UI, saved English codes, reset, offline retry, HTTP errors, empty response');
+  console.log('PASS: Galaxy Tab A11+ viewport rules, 11 languages, logo, English response codes, reset, offline retry and error handling');
 }
 test().catch(error => {console.error(error);process.exitCode=1;});
