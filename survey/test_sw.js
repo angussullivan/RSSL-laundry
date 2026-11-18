@@ -8,7 +8,7 @@ async function main() {
   const events = {};
   const deleted = [];
   const stored = new Map();
-  const oldKeys = ['rssl-survey-app-v1','rssl-kiosk-v3','unrelated-site-cache'];
+  const oldKeys = ['rssl-survey-app-v1','rssl-kiosk-v4','unrelated-site-cache'];
   let online = true, hits=0;
   const cache = {
     async addAll(paths){for(const p of paths)stored.set(p, {ok:true,text:'cached '+p});},
@@ -16,7 +16,7 @@ async function main() {
     async put(req,response){stored.set(typeof req==='string'?req:req.url,response);},
   };
   const caches = {
-    async open(key){assert.equal(key,'rssl-kiosk-v4');return cache;},
+    async open(key){assert.equal(key,'rssl-kiosk-v5');return cache;},
     async keys(){return [...oldKeys];},
     async delete(key){deleted.push(key);return true;},
   };
@@ -43,7 +43,7 @@ async function main() {
 
   events.activate({waitUntil(p){promise=p;}});
   await promise;
-  assert.deepEqual(deleted.sort(),['rssl-kiosk-v3','rssl-survey-app-v1'],
+  assert.deepEqual(deleted.sort(),['rssl-kiosk-v4','rssl-survey-app-v1'],
     'Only survey-owned old caches are deleted');
 
   function navigation(url){
