@@ -22,9 +22,7 @@ In the existing repository go to **Settings > Secrets and variables > Actions
    app password and paste it **only into the GitHub secret value**.
    Do **not** enter the ordinary Google password. Do not paste the
    app password into ChatGPT or any publicly hosted code.
-3. **`RSSL_SUPABASE_SERVICE_ROLE_KEY`** — obtain the new RSSL Customer Survey
-   project's `service_role` key in Supabase Settings > API Keys
-   (or an equivalent server-side key with SELECT permissions).
+3. **`RSSL_SUPABASE_SECRET_KEY`** — copy the modern `sb_secret_...` key from the RSSL project's Supabase Settings > API Keys > Secret keys section. Do not use the legacy service_role key.
    Store it only as the GitHub Actions secret, never in this public repository
    or the survey website. The browser's publishable key cannot read data
    because customer data is protected by RLS.
