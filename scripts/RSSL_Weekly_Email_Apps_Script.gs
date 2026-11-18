@@ -112,7 +112,7 @@ function rsslEscape_(v) {
   );
 }
 
-function rsslBuildReport_(recent, older, periodLabel, isTest) {
+function rsslBuildReport_(recent, older, sixWeek, periodLabel, isTest, benchmarkPeriod) {
   const metrics = [
     ['Survey responses', String(recent.length), String(older.length)],
     ['First-time visitors', rsslRatio_(recent,'visit_type',['first']), rsslRatio_(older,'visit_type',['first'])],
@@ -125,6 +125,25 @@ function rsslBuildReport_(recent, older, periodLabel, isTest) {
     ['Used Google on visit day', rsslRatio_(recent,'google_today',['maps','search','both']), rsslRatio_(older,'google_today',['maps','search','both'])],
     ['Good or Excellent rating', rsslRatio_(recent,'experience',['excellent','good']), rsslRatio_(older,'experience',['excellent','good'])]
   ];
+  // Six completed calendar weeks: volume is mean/week, survey rates are pooled.
+  const benchmarkMetrics = [
+    (sixWeek.length / 6).toFixed(1) + ' per week',
+    rsslRatio_(sixWeek,'visit_type',['first']),
+    rsslGoogleFirst_(sixWeek,'first'),
+    rsslGoogleFirst_(sixWeek,'repeat'),
+    rsslRatio_(sixWeek,'discovery_source',['google_maps']),
+    rsslRatio_(sixWeek,'discovery_source',['google_search']),
+    rsslRatio_(sixWeek,'discovery_source',['walk_by']),
+    rsslRatio_(sixWeek,'discovery_source',['recommendation']),
+    rsslRatio_(sixWeek,'google_today',['maps','search','both']),
+    rsslRatio_(sixWeek,'experience',['excellent','good'])
+  ];
+  metrics.forEach((metric, i) => metric.push(benchmarkMetrics[i]));
+  const benchmarkNote = '6-week period: ' + benchmarkPeriod +
+    '. Survey volume is the average per calendar week (including zero-response weeks); ' +
+    'percentages pool all answered responses across six weeks (a response-weighted average). ' +
+    'The benchmark may be low while the survey is newly launched. ' +
+    '6-week sample: ' + sixWeek.length + ' responses.';
   const sourceLabels = {
     google_maps:'Google Maps',google_search:'Google Search',walk_by:'Walking past',
     recommendation:'Recommendation',other:'Other',unsure:'Unsure'
@@ -147,7 +166,7 @@ function rsslBuildReport_(recent, older, periodLabel, isTest) {
     'Revenue and Google Ads spending are not connected to this report.';
   const prefix = isTest ? '[TEST · Current week to date] ' : '';
   const subject = prefix + 'RSSL | Weekly Customer Insights — ' + periodLabel;
-  const tableHead = '<tr><th align="left">Metric</th><th align="left">Period</th><th align="left">Previous week</th></tr>';
+  const tableHead = '<tr><th align="left">Metric</th><th align="left">' + (isTest ? 'Week to date' : 'Last week') + '</th><th align="left">Previous week</th><th align="left">6-week average / benchmark</th></tr>';
   const tableRows = metrics.map(cols => '<tr>' + cols.map(c =>
     '<td style="border-bottom:1px solid #e2e7e5;padding:9px">' + rsslEscape_(c) + '</td>'
   ).join('') + '</tr>').join('');
@@ -158,14 +177,15 @@ function rsslBuildReport_(recent, older, periodLabel, isTest) {
     '<p><b>Executive summary:</b> ' + rsslEscape_(recommendation) + '</p>' +
     '<table style="border-collapse:collapse;width:100%;font-size:13px"><thead style="background:#e8f0ec">' +
     tableHead + '</thead><tbody>' + tableRows + '</tbody></table>' +
+    '<p style="font-size:12px;color:#526d67">' + rsslEscape_(benchmarkNote) + '</p>' +
     '<h3>Where visitors first discovered us</h3><p>' + rsslEscape_(sources) + '</p>' +
     '<h3>Most requested improvements</h3><p>' + rsslEscape_(issues) + '</p>' +
     '<h3>Recommendation</h3><p>' + rsslEscape_(recommendation) + '</p>' +
     '<h3>Important limitations</h3><p>' + rsslEscape_(limitations) + '</p>' +
     '<p style="font-size:12px;color:#777">Anonymous in-store survey · Percentages exclude skipped answers ' +
     'per question. Remove initial setup test responses before using the results for decisions.</p></div>';
-  const plain = [subject, '', recommendation, '', 'Metric | Period | Previous week',
-    ...metrics.map(row => row.join(' | ')), '',
+  const plain = [subject, '', recommendation, '', 'Metric | ' + (isTest ? 'Week to date' : 'Last week') + ' | Previous week | 6-week average / benchmark',
+    ...metrics.map(row => row.join(' | ')), '', benchmarkNote, '',
     'First discovery: ' + sources,
     'Improvements: ' + issues,
     'Limitations: ' + limitations
