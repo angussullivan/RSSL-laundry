@@ -35,6 +35,21 @@ h1{font-size:clamp(38px,6vw,67px);font-weight:780;letter-spacing:-.055em;line-he
 @media(max-height:650px) and (min-width:700px){.view{padding-top:15px;padding-bottom:15px}.option{min-height:64px;padding:11px 20px}.options{gap:10px}.question{font-size:38px}.help{margin-bottom:12px}.topbar{padding-top:10px;padding-bottom:10px}.footer{padding-top:7px;padding-bottom:7px}}
 @media(prefers-reduced-motion:reduce){.panel{animation:none}}
 
+
+/* Language selection, tap targets and compact tablet layouts. */
+.topbar-side{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.language-control{display:flex;align-items:center;gap:9px}
+.language-label{color:#c5e8df;font-size:11px;white-space:nowrap;font-weight:750;letter-spacing:.04em}
+.language-select{font:inherit;font-size:16px;min-height:45px;max-width:205px;border-radius:10px;
+  background:#f8fdfa;color:#153b34;border:1px solid #9bbeb1;padding:8px 11px;cursor:pointer}
+.language-select:focus-visible{outline:3px solid #ffd487;outline-offset:2px}
+@media(max-width:780px){
+  .topbar{flex-wrap:wrap}
+  .topbar-side{width:100%;justify-content:space-between;flex-wrap:nowrap}
+  .language-label{font-size:10px}
+  .language-select{max-width:180px;min-width:120px;font-size:15px}
+  .connection{font-size:11px}
+}
 </style>
   <title>Reservoir Street Laundry · Customer survey</title>
 </head>
@@ -47,14 +62,29 @@ h1{font-size:clamp(38px,6vw,67px);font-weight:780;letter-spacing:-.055em;line-he
         </div>
         <div><div class="brand-name">RESERVOIR STREET</div><div class="brand-sub">SELF SERVICE LAUNDRY · SURRY HILLS</div></div>
       </div>
-      <div class="topbar-side"><span id="connection" class="connection" role="status" aria-live="polite">Checking connection</span></div>
+      <div class="topbar-side"><div class="language-control">
+      <label for="survey-language" class="language-label">LANGUAGE / 语言</label>
+      <select id="survey-language" class="language-select" aria-label="Survey language">
+        <option value="en">English</option>
+        <option value="zh-CN">简体中文</option>
+        <option value="zh-TW">繁體中文</option>
+        <option value="ja">日本語</option>
+        <option value="ko">한국어</option>
+        <option value="hi">हिन्दी</option>
+        <option value="id">Bahasa Indonesia</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="pt-BR">Português</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </div><span id="connection" class="connection" role="status" aria-live="polite">Checking connection</span></div>
     </header>
 
     <div id="setup-banner" class="setup-banner" hidden><strong>PREVIEW MODE</strong> — Survey works, but answers are not stored. Connect Supabase before using with customers.</div>
 
     <main id="view" class="view" aria-live="polite"><section class="panel"><h1>How did you find us?</h1><p class="subtitle">The survey is starting. If this message remains, please refresh the page.</p></section></main>
 
-    <footer class="footer"><span>Anonymous survey · No name or contact details requested</span><span>67 Reservoir Street, Surry Hills</span></footer>
+    <footer class="footer"><span id="footer-message">Anonymous survey · No personal details requested</span><span>67 Reservoir Street, Surry Hills</span></footer>
   </div>
   <script>
 window.addEventListener('error', function(e) {
@@ -89,6 +119,22 @@ window.RSSL_CONFIG = {
     {key:'experience', title:'How has your visit been?', help:'No problem if you have only just arrived.', choices:[['excellent','Excellent'],['good','Good'],['needs_work','Could be better'],['not_finished','I haven’t finished yet']]},
     {key:'improvement', title:'What could we improve?', help:'Optional — choose the most important thing, or skip.', choices:[['nothing','Nothing — all good'],['machines','Machine availability'],['cleanliness','Cleanliness'],['prices','Pricing'],['payment','Card payment'],['instructions','Instructions / signage'],['other','Something else']]}
   ];
+
+  const LANGUAGE_PACKS = {"en":{"ui":["A little feedback makes a big difference","How did you find us?","Five quick questions, about 20 seconds. No name or contact details needed.","Start survey →","Thank you for supporting a local business.","QUESTION","Cancel","← Back","Skip this question →","Skip & finish","Thank you!","Your feedback helps improve Reservoir Street Laundry.","Your anonymous response was received.","Saved on this tablet. Upload not yet confirmed.","Saved on this tablet. It will send when internet returns.","Preview only — responses are not saved.","Couldn't save this response. Please tell staff.","Finish","This screen resets for the next customer.","Anonymous survey · No personal details requested","No answers were recorded."],"q":[["Is this your first visit?","Select one answer.","Yes, first time","No, I've been before","Prefer not to say"],["How did you first hear about us?","Think of when you originally discovered this laundry.","Google Maps","Google Search","Walking past","Friend or family","Something else","Can't remember"],["Did you use Google to find us today?","Including searching for our address or directions.","Yes — Google Maps","Yes — Google Search","Yes — both","No","Not sure"],["How has your visit been?","It's fine if you haven't finished yet.","Excellent","Good","Could be better","I haven't finished yet"],["What could we improve?","Optional — choose one, or skip.","Nothing — all good","Machine availability","Cleanliness","Pricing","Card payment","Instructions / signage","Something else"]]},"zh-CN":{"ui":["您的反馈让我们做得更好","您是怎样找到我们的？","只需回答五个简短问题，约20秒，无需填写个人信息。","开始问卷 →","感谢您支持本地商家。","问题","取消","← 返回","跳过此题 →","跳过并完成","谢谢您！","您的反馈将帮助我们改善洗衣店服务。","已收到您的匿名反馈。","已保存在本设备，但尚未确认上传成功。","已保存在本设备，联网后将自动上传。","预览模式：答案不会保存。","无法保存回答，请告知工作人员。","完成","页面将自动重置，供下一位顾客使用。","匿名问卷 · 无需填写个人信息","未记录任何回答。"],"q":[["这是您第一次来吗？","请选择一项。","是的，第一次","不是，我以前来过","不愿回答"],["您最初是怎样知道这家洗衣店的？","请回想第一次发现本店的方式。","谷歌地图","谷歌搜索","路过看到","朋友或家人推荐","其他方式","记不清了"],["您今天有使用谷歌来找我们吗？","包括查询地址或导航路线。","是，谷歌地图","是，谷歌搜索","两者都用了","没有","不确定"],["您对本次体验满意吗？","还没洗完也可以回答。","非常满意","满意","有待改善","还没结束"],["您觉得我们可以改善什么？","可选：请选择一项或跳过。","没有，一切都好","机器供应情况","清洁程度","价格","刷卡付款","使用说明或标识","其他"]]},"zh-TW":{"ui":["您的意見讓我們做得更好","您是怎麼找到我們的？","只要回答五個簡短問題，約20秒，無須提供個人資料。","開始問卷 →","感謝您支持本地商家。","問題","取消","← 返回","略過這題 →","略過並完成","謝謝您！","您的回饋能幫助我們改善洗衣店服務。","已收到您的匿名回覆。","已儲存在本裝置，但尚未確認上傳。","已儲存在本裝置，連線後將自動上傳。","預覽模式：回答不會儲存。","無法儲存回答，請通知工作人員。","完成","畫面將自動重設，供下一位顧客使用。","匿名問卷 · 無須提供個人資料","未記錄任何回答。"],"q":[["這是您第一次來嗎？","請選擇一項。","是，第一次","不是，我之前來過","不願回答"],["您最初是怎麼知道這家洗衣店的？","請回想第一次發現本店的方式。","Google 地圖","Google 搜尋","路過看到","朋友或家人推薦","其他方式","不記得了"],["您今天有用 Google 找我們嗎？","包括查詢地址或導航路線。","有，用 Google 地圖","有，用 Google 搜尋","兩者都有","沒有","不確定"],["您對這次體驗感覺如何？","還沒完成洗衣也可以回答。","非常好","好","有待改善","還沒完成"],["我們可以改善什麼？","選填：請選一項或略過。","沒有，一切都很好","機器使用情況","清潔程度","價格","刷卡付款","使用說明或標示","其他"]]},"ja":{"ui":["皆さまのご意見が改善につながります","当店をどのように知りましたか？","質問は5つ、約20秒で終わります。個人情報は不要です。","アンケートを開始 →","地域のお店を応援していただき、ありがとうございます。","質問","キャンセル","← 戻る","この質問をスキップ →","スキップして終了","ありがとうございます！","皆さまの声をサービス向上に役立てます。","匿名の回答を受け付けました。","端末に保存しました。送信はまだ確認できていません。","端末に保存しました。接続が戻ると送信されます。","プレビュー：回答は保存されません。","回答を保存できませんでした。スタッフにお知らせください。","完了","次のお客様のために自動で初期画面に戻ります。","匿名アンケート・個人情報は不要です","回答は記録されませんでした。"],"q":[["今回が初めてのご利用ですか？","1つ選んでください。","はい、初めてです","いいえ、利用したことがあります","回答しない"],["初めて当店を知ったきっかけは？","最初に当店を見つけた方法をお選びください。","Google マップ","Google 検索","通りがかり","友人・家族の紹介","その他","覚えていない"],["今日、当店を探すのに Google を使いましたか？","住所の検索や経路案内も含みます。","はい、Google マップ","はい、Google 検索","両方使った","使っていない","わからない"],["ご利用の感想はいかがですか？","まだ洗濯中でも回答できます。","とても良い","良い","改善してほしい","まだ利用中"],["改善してほしい点はありますか？","任意：1つ選ぶかスキップしてください。","特になし","機械の空き状況","清潔さ","料金","カード決済","案内・説明表示","その他"]]},"ko":{"ui":["여러분의 의견이 큰 도움이 됩니다","저희 매장을 어떻게 알게 되셨나요?","질문은 다섯 개, 약 20초면 끝납니다. 개인정보는 필요하지 않습니다.","설문 시작 →","지역 매장을 이용해 주셔서 감사합니다.","질문","취소","← 뒤로","이 질문 건너뛰기 →","건너뛰고 완료","감사합니다!","고객님의 의견은 더 나은 서비스를 만드는 데 도움이 됩니다.","익명 응답이 접수되었습니다.","기기에 저장했지만 업로드는 아직 확인되지 않았습니다.","기기에 저장했습니다. 인터넷이 연결되면 전송됩니다.","미리보기: 응답이 저장되지 않습니다.","응답을 저장할 수 없습니다. 직원에게 알려주세요.","완료","다음 고객을 위해 화면이 자동으로 초기화됩니다.","익명 설문 · 개인정보 입력 불필요","기록된 응답이 없습니다."],"q":[["처음 방문하셨나요?","하나를 선택해 주세요.","네, 처음입니다","아니요, 와 본 적이 있습니다","답변하지 않겠습니다"],["처음 저희 매장을 어떻게 알게 되셨나요?","매장을 처음 발견한 방법을 선택해 주세요.","Google 지도","Google 검색","지나가다가","친구 또는 가족 소개","기타","기억나지 않음"],["오늘 매장을 찾을 때 Google을 사용하셨나요?","주소나 길 찾기 검색도 포함합니다.","네, Google 지도","네, Google 검색","둘 다","아니요","잘 모르겠어요"],["이용 경험은 어떠셨나요?","아직 세탁 중이어도 괜찮습니다.","매우 좋음","좋음","개선이 필요함","아직 이용 중"],["개선하면 좋을 점은 무엇인가요?","선택사항: 하나를 고르거나 건너뛰세요.","없음, 모두 좋음","세탁기 이용 가능 여부","청결","가격","카드 결제","이용 안내 또는 표지판","기타"]]},"hi":{"ui":["आपकी राय से हमारी सेवा बेहतर होती है","आपको हमारे बारे में कैसे पता चला?","पाँच छोटे सवाल, लगभग 20 सेकंड। कोई व्यक्तिगत जानकारी नहीं चाहिए।","सर्वे शुरू करें →","स्थानीय व्यवसाय का समर्थन करने के लिए धन्यवाद।","प्रश्न","रद्द करें","← पीछे जाएँ","यह सवाल छोड़ें →","छोड़कर समाप्त करें","धन्यवाद!","आपकी राय से हम अपनी लॉन्ड्री बेहतर बना सकते हैं।","आपका गुमनाम जवाब प्राप्त हो गया है।","इस टैबलेट पर सहेजा गया है, अपलोड की पुष्टि बाकी है।","इस टैबलेट पर सहेजा गया है। इंटरनेट आने पर भेजा जाएगा।","सिर्फ पूर्वावलोकन — जवाब सहेजे नहीं जाएँगे।","जवाब सहेजा नहीं जा सका। कृपया स्टाफ को बताएँ।","समाप्त","अगले ग्राहक के लिए स्क्रीन अपने आप रीसेट होगी।","गुमनाम सर्वे · व्यक्तिगत जानकारी ज़रूरी नहीं","कोई जवाब दर्ज नहीं हुआ।"],"q":[["क्या यह आपकी पहली यात्रा है?","एक जवाब चुनें।","हाँ, पहली बार","नहीं, पहले भी आया/आई हूँ","जवाब नहीं देना चाहता/चाहती"],["आपको पहली बार इस लॉन्ड्री का पता कैसे चला?","याद करें कि आपने इसे पहली बार कैसे खोजा था।","Google मैप्स","Google सर्च","पास से गुजरते हुए","दोस्त या परिवार से","किसी और तरह से","याद नहीं"],["क्या आज यहाँ पहुँचने के लिए आपने Google इस्तेमाल किया?","पता या रास्ता खोजने को भी गिनें।","हाँ, Google मैप्स","हाँ, Google सर्च","हाँ, दोनों","नहीं","पता नहीं"],["यहाँ आपका अनुभव कैसा रहा?","अगर आपका काम अभी पूरा नहीं हुआ, तो भी ठीक है।","बहुत अच्छा","अच्छा","बेहतर हो सकता है","अभी काम पूरा नहीं हुआ"],["हम क्या बेहतर कर सकते हैं?","वैकल्पिक — एक चुनें या छोड़ दें।","कुछ नहीं, सब अच्छा है","मशीनों की उपलब्धता","सफाई","कीमतें","कार्ड से भुगतान","निर्देश या संकेत","कुछ और"]]},"id":{"ui":["Masukan Anda sangat berarti","Bagaimana Anda menemukan kami?","Lima pertanyaan singkat, sekitar 20 detik. Tidak perlu data pribadi.","Mulai survei →","Terima kasih telah mendukung usaha lokal.","PERTANYAAN","Batal","← Kembali","Lewati pertanyaan →","Lewati & selesai","Terima kasih!","Masukan Anda membantu meningkatkan layanan laundry kami.","Jawaban anonim Anda telah diterima.","Tersimpan di tablet ini, tetapi pengiriman belum dikonfirmasi.","Tersimpan di tablet ini. Akan dikirim saat internet kembali.","Pratinjau saja — jawaban tidak disimpan.","Jawaban gagal disimpan. Harap beri tahu staf.","Selesai","Layar akan kembali ke awal untuk pelanggan berikutnya.","Survei anonim · Tidak perlu data pribadi","Tidak ada jawaban yang dicatat."],"q":[["Apakah ini kunjungan pertama Anda?","Pilih satu jawaban.","Ya, pertama kali","Tidak, sudah pernah","Tidak ingin menjawab"],["Bagaimana pertama kali Anda mengetahui laundry ini?","Ingat saat pertama kali menemukan tempat ini.","Google Maps","Google Search","Lewat di depan toko","Teman atau keluarga","Cara lain","Tidak ingat"],["Apakah Anda memakai Google untuk menemukan kami hari ini?","Termasuk mencari alamat atau petunjuk arah.","Ya, Google Maps","Ya, Google Search","Ya, keduanya","Tidak","Tidak yakin"],["Bagaimana pengalaman Anda di sini?","Tidak masalah jika cucian belum selesai.","Sangat baik","Baik","Perlu ditingkatkan","Belum selesai"],["Apa yang bisa kami tingkatkan?","Opsional — pilih satu atau lewati.","Tidak ada, semua baik","Ketersediaan mesin","Kebersihan","Harga","Pembayaran kartu","Petunjuk atau papan informasi","Lainnya"]]},"es":{"ui":["Tu opinión nos ayuda a mejorar","¿Cómo nos encontraste?","Cinco preguntas rápidas, unos 20 segundos. No pedimos datos personales.","Empezar encuesta →","Gracias por apoyar a un negocio local.","PREGUNTA","Cancelar","← Atrás","Saltar pregunta →","Saltar y terminar","¡Gracias!","Tus respuestas nos ayudan a mejorar nuestra lavandería.","Hemos recibido tu respuesta anónima.","Guardada en esta tableta; aún no se confirma el envío.","Guardada en esta tableta. Se enviará al volver internet.","Solo vista previa: las respuestas no se guardan.","No se pudo guardar. Avisa al personal.","Terminar","La pantalla se reiniciará para el siguiente cliente.","Encuesta anónima · Sin datos personales","No se registraron respuestas."],"q":[["¿Es tu primera visita?","Elige una respuesta.","Sí, es mi primera vez","No, ya he venido","Prefiero no responder"],["¿Cómo conociste esta lavandería por primera vez?","Piensa en cómo la descubriste originalmente.","Google Maps","Búsqueda de Google","Pasando por delante","Amigos o familiares","Otro medio","No recuerdo"],["¿Usaste Google para encontrarnos hoy?","Incluye buscar la dirección o indicaciones.","Sí, Google Maps","Sí, Búsqueda de Google","Sí, ambos","No","No estoy seguro/a"],["¿Qué tal ha sido tu visita?","No importa si aún no has terminado.","Excelente","Buena","Podría mejorar","Aún no he terminado"],["¿Qué podríamos mejorar?","Opcional: elige una opción o sáltala.","Nada, todo bien","Disponibilidad de máquinas","Limpieza","Precios","Pago con tarjeta","Instrucciones o carteles","Otra cosa"]]},"fr":{"ui":["Votre avis nous aide à progresser","Comment nous avez-vous trouvés ?","Cinq questions rapides, environ 20 secondes. Aucune donnée personnelle demandée.","Commencer →","Merci de soutenir un commerce local.","QUESTION","Annuler","← Retour","Passer cette question →","Passer et terminer","Merci !","Votre avis nous aide à améliorer notre laverie.","Votre réponse anonyme a bien été reçue.","Enregistrée sur cette tablette ; envoi non confirmé.","Enregistrée sur cette tablette. Envoi dès le retour d'Internet.","Aperçu uniquement : réponses non enregistrées.","Impossible d'enregistrer. Prévenez le personnel.","Terminer","L'écran se réinitialisera pour le prochain client.","Enquête anonyme · Aucune donnée personnelle","Aucune réponse enregistrée."],"q":[["Est-ce votre première visite ?","Choisissez une réponse.","Oui, première visite","Non, je suis déjà venu(e)","Je préfère ne pas répondre"],["Comment avez-vous découvert cette laverie ?","Pensez à la toute première fois.","Google Maps","Recherche Google","En passant devant","Amis ou famille","Autrement","Je ne me souviens pas"],["Avez-vous utilisé Google pour venir aujourd'hui ?","Y compris pour l'adresse ou l'itinéraire.","Oui, Google Maps","Oui, Recherche Google","Oui, les deux","Non","Je ne sais pas"],["Comment se passe votre visite ?","Vous pouvez répondre même si ce n'est pas fini.","Excellente","Bonne","À améliorer","Je n'ai pas encore terminé"],["Que pourrions-nous améliorer ?","Facultatif : choisissez une réponse ou passez.","Rien, tout va bien","Disponibilité des machines","Propreté","Prix","Paiement par carte","Consignes ou signalisation","Autre chose"]]},"pt-BR":{"ui":["Sua opinião faz a diferença","Como você nos encontrou?","Cinco perguntas rápidas, cerca de 20 segundos. Sem dados pessoais.","Começar pesquisa →","Obrigado por apoiar um negócio local.","PERGUNTA","Cancelar","← Voltar","Pular pergunta →","Pular e concluir","Obrigado!","Sua opinião ajuda a melhorar nossa lavanderia.","Sua resposta anônima foi recebida.","Salva neste tablet, mas o envio ainda não foi confirmado.","Salva neste tablet. Será enviada quando a internet voltar.","Apenas prévia — as respostas não serão salvas.","Não foi possível salvar. Avise a equipe.","Concluir","A tela será reiniciada para o próximo cliente.","Pesquisa anônima · Sem dados pessoais","Nenhuma resposta foi registrada."],"q":[["É sua primeira visita?","Escolha uma resposta.","Sim, primeira vez","Não, já vim antes","Prefiro não responder"],["Como conheceu esta lavanderia pela primeira vez?","Pense em quando descobriu este lugar.","Google Maps","Pesquisa Google","Passando em frente","Amigos ou família","De outra forma","Não lembro"],["Você usou o Google para nos encontrar hoje?","Inclui buscar o endereço ou a rota.","Sim, Google Maps","Sim, Pesquisa Google","Sim, os dois","Não","Não tenho certeza"],["Como foi sua experiência?","Tudo bem se ainda não terminou.","Excelente","Boa","Poderia melhorar","Ainda não terminei"],["O que podemos melhorar?","Opcional — escolha uma opção ou pule.","Nada, tudo ótimo","Disponibilidade das máquinas","Limpeza","Preços","Pagamento com cartão","Instruções ou placas","Outra coisa"]]},"de":{"ui":["Ihr Feedback hilft uns, besser zu werden","Wie haben Sie uns gefunden?","Fünf kurze Fragen, etwa 20 Sekunden. Keine persönlichen Daten nötig.","Umfrage starten →","Vielen Dank, dass Sie ein lokales Geschäft unterstützen.","FRAGE","Abbrechen","← Zurück","Frage überspringen →","Überspringen & beenden","Vielen Dank!","Ihr Feedback hilft uns, unseren Waschsalon zu verbessern.","Ihre anonyme Antwort ist eingegangen.","Auf diesem Tablet gespeichert; Übertragung noch nicht bestätigt.","Auf diesem Tablet gespeichert. Wird bei Internetverbindung übertragen.","Nur Vorschau – Antworten werden nicht gespeichert.","Speichern fehlgeschlagen. Bitte Personal informieren.","Fertig","Der Bildschirm wird für den nächsten Gast zurückgesetzt.","Anonyme Umfrage · Keine persönlichen Daten","Es wurden keine Antworten erfasst."],"q":[["Sind Sie zum ersten Mal hier?","Bitte eine Antwort auswählen.","Ja, zum ersten Mal","Nein, ich war schon hier","Keine Angabe"],["Wie haben Sie diesen Waschsalon zuerst entdeckt?","Denken Sie an den ersten Kontakt.","Google Maps","Google-Suche","Beim Vorbeigehen","Freunde oder Familie","Anders","Weiß ich nicht mehr"],["Haben Sie heute Google genutzt, um uns zu finden?","Auch Adresssuche oder Wegbeschreibung zählen.","Ja, Google Maps","Ja, Google-Suche","Ja, beides","Nein","Weiß nicht"],["Wie war Ihr Besuch bisher?","Auch wenn Sie noch nicht fertig sind.","Ausgezeichnet","Gut","Verbesserungswürdig","Ich bin noch nicht fertig"],["Was könnten wir verbessern?","Optional – eine Antwort wählen oder überspringen.","Nichts, alles gut","Verfügbarkeit der Maschinen","Sauberkeit","Preise","Kartenzahlung","Anleitungen oder Beschilderung","Sonstiges"]]}};
+  const languagePicker = document.getElementById('survey-language');
+  const footerMessage = document.getElementById('footer-message');
+  let language = 'en';
+  function ui(i){return (LANGUAGE_PACKS[language] || LANGUAGE_PACKS.en).ui[i];}
+  function translation(i){return (LANGUAGE_PACKS[language] || LANGUAGE_PACKS.en).q[i];}
+  function chooseLanguage(value){
+    language = Object.prototype.hasOwnProperty.call(LANGUAGE_PACKS,value) ? value : 'en';
+    document.documentElement.lang = language;
+    languagePicker.value = language;
+    footerMessage.textContent = ui(19);
+    if(step === -1) renderWelcome();
+    else if(step >= 0 && step < questions.length) renderQuestion(step);
+  }
+
   const view=document.getElementById('view'), connection=document.getElementById('connection'), banner=document.getElementById('setup-banner');
   let step=-1, answers={}, idleHandle=null, thanksHandle=null, sending=false, lastUploadError=false;
   if (!live) banner.hidden=false;
@@ -98,28 +144,58 @@ window.RSSL_CONFIG = {
   function resetIdle(){clearTimeout(idleHandle);if(step>=0 && step<questions.length) idleHandle=setTimeout(welcome,75000);}
   document.addEventListener('pointerdown',()=>{if(step>=0 && step<questions.length)resetIdle();},{passive:true});
   document.addEventListener('keydown',()=>{if(step>=0 && step<questions.length)resetIdle();});
-  function welcome(){clearTimers();step=-1;answers={};const p=panel();
-    const hero=el('div','hero-symbol'),sym=el('span','','✦');hero.append(sym,el('p','eyebrow','A little feedback makes a big difference'));p.append(hero);
-    p.append(el('h1','', 'How did you find us?'),el('p','subtitle','Help your local laundromat get better. Five quick taps, around 20 seconds. No personal details.'));
-    const b=el('button','big-button','Start survey  →');b.type='button';b.addEventListener('click',()=>renderQuestion(0));p.append(b,el('p','muted','Thank you for supporting an independent neighbourhood business.'));
+
+  function renderWelcome(){
+    step=-1;
+    const p=panel();
+    const hero=el('div','hero-symbol'),sym=el('span','','✦');
+    hero.append(sym,el('p','eyebrow',ui(0)));p.append(hero);
+    p.append(el('h1','',ui(1)),el('p','subtitle',ui(2)));
+    const b=el('button','big-button',ui(3));b.type='button';
+    b.addEventListener('click',()=>renderQuestion(0));
+    p.append(b,el('p','muted',ui(4)));
   }
-  function renderQuestion(idx){clearTimeout(thanksHandle);step=idx;const q=questions[idx],p=panel();
-    const h=el('div','question-head');h.append(el('span','step',`QUESTION ${idx+1} OF ${questions.length}`));const prog=el('div','progress');prog.setAttribute('aria-label',`Question ${idx+1} of ${questions.length}`);questions.forEach((_,i)=>prog.append(el('b',i<=idx?'active':'')));h.append(prog);p.append(h,el('h2','question',q.title),el('p','help',q.help));
-    const opts=el('div','options');q.choices.forEach(([value,label])=>{let b=el('button','option',label);b.type='button';b.addEventListener('click',()=>select(value));opts.append(b);});p.append(opts);
-    const actions=el('div','actions');const back=el('button','link-button',idx===0?'Cancel':'← Back');back.type='button';back.addEventListener('click',()=>idx===0?welcome():renderQuestion(idx-1));actions.append(back);
-    const skip=el('button','link-button skip',idx===4?'Skip & finish':'Skip this question →');skip.type='button';skip.addEventListener('click',()=>select(null));actions.append(skip);p.append(actions);
+  function welcome(){
+    clearTimers();answers={};language='en';languagePicker.value='en';
+    document.documentElement.lang='en';footerMessage.textContent=ui(19);
+    renderWelcome();
+  }
+
+  function renderQuestion(idx){
+    clearTimeout(thanksHandle);step=idx;
+    const q=questions[idx],tr=translation(idx),p=panel();
+    const h=el('div','question-head');
+    h.append(el('span','step',ui(5)+' '+(idx+1)+' / '+questions.length));
+    const prog=el('div','progress');
+    prog.setAttribute('aria-label',ui(5)+' '+(idx+1)+' / '+questions.length);
+    questions.forEach((_,i)=>prog.append(el('b',i<=idx?'active':'')));
+    h.append(prog);
+    p.append(h,el('h2','question',tr[0]),el('p','help',tr[1]));
+    const opts=el('div','options');
+    q.choices.forEach(([value],i)=>{
+      const b=el('button','option',tr[i+2]);b.type='button';
+      b.addEventListener('click',()=>select(value));opts.append(b);
+    });
+    p.append(opts);
+    const actions=el('div','actions'),back=el('button','link-button',idx===0?ui(6):ui(7));
+    back.type='button';back.addEventListener('click',()=>idx===0?welcome():renderQuestion(idx-1));
+    actions.append(back);
+    const skip=el('button','link-button skip',idx===4?ui(9):ui(8));
+    skip.type='button';skip.addEventListener('click',()=>select(null));
+    actions.append(skip);p.append(actions);
   }
   function select(value){if(step<0||step>=questions.length||sending)return;answers[questions[step].key]=value;const next=step+1;if(next<questions.length)renderQuestion(next);else submit();}
   function uuid(){if(self.crypto&&crypto.randomUUID)return crypto.randomUUID();throw new Error('Secure context required for new submissions');}
   function loadQueue(){try{const x=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
-  function saveQueue(q){localStorage.setItem(QUEUE_KEY,JSON.stringify(q.slice(-250)));}
+  function saveQueue(q){localStorage.setItem(QUEUE_KEY,JSON.stringify(q));}
   async function send(payload){
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),12000);
     try {
       const res=await fetch(ENDPOINT,{method:'POST',mode:'cors',cache:'no-store',signal:controller.signal,headers:{'apikey':cfg.publishableKey,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});
-      if(res.ok||res.status===409)return true;
+      if(res.ok)return true;
       const message=await res.text().catch(()=>'');
+      if(res.status===409 && /23505|duplicate key|unique constraint/i.test(message))return true;
       throw new Error(`Submission failed (${res.status}): ${message.substring(0,250)}`);
     } finally { clearTimeout(timeout); }
   }
@@ -136,25 +212,31 @@ window.RSSL_CONFIG = {
   }finally{syncing=false;updateConnection()}}
   async function submit(){if(sending)return;sending=true;const snapshot={...answers};clearTimers();step=questions.length;const p=panel();
     let result='demo';
-    if(live){try{const payload={submission_id:uuid(),answered_at:new Date().toISOString(),visit_type:snapshot.visit_type??null,discovery_source:snapshot.discovery_source??null,google_today:snapshot.google_today??null,experience:snapshot.experience??null,improvement:snapshot.improvement??null};
+    if(!Object.values(snapshot).some(v=>v!==null && v!==undefined)){result='empty';}
+    else if(live){try{const payload={submission_id:uuid(),answered_at:new Date().toISOString(),visit_type:snapshot.visit_type??null,discovery_source:snapshot.discovery_source??null,google_today:snapshot.google_today??null,experience:snapshot.experience??null,improvement:snapshot.improvement??null};
       const pending=loadQueue();pending.push(payload);saveQueue(pending);result='queued';
       if(navigator.onLine){await flush();result=loadQueue().some(a=>a.submission_id===payload.submission_id)?'queued':'saved';}
     }catch(e){console.error(e);result='problem';}}
-    p.append(el('div','complete-mark','✓'),el('h1','', 'Thank you!'),el('p','subtitle','Your feedback helps make Reservoir Street Laundry better for everyone.'));
+
+    p.append(el('div','complete-mark','✓'),el('h1','',ui(10)),el('p','subtitle',ui(11)));
     const msg=el('div','note-box'+((result==='queued'||result==='problem')?' warn':''));
-    msg.textContent=result==='saved'?'Your anonymous response was received.':result==='queued'?(navigator.onLine?'Response saved on this tablet, but upload is not yet confirmed. Staff should check the connection.':'Response saved on this tablet. It will upload when the connection returns.'):result==='demo'?'Preview only — your answers were not saved.':'A device storage error occurred; please check setup.';p.append(msg);
-    const b=el('button','big-button','Finish');b.addEventListener('click',welcome);p.append(b,el('p','muted','This screen resets automatically for the next customer.'));
+    const messages={saved:ui(12),queued:navigator.onLine?ui(13):ui(14),demo:ui(15),problem:ui(16),empty:ui(20)};
+    msg.textContent=messages[result] || ui(16);p.append(msg);
+    const b=el('button','big-button',ui(17));b.type='button';b.addEventListener('click',welcome);
+    p.append(b,el('p','muted',ui(18)));
     thanksHandle=setTimeout(welcome,9000);sending=false;updateConnection();
   }
   function updateConnection(){
     if(!live){connection.className='connection preview';connection.textContent='Preview';return;}
     let pending=loadQueue().length;if(!navigator.onLine){connection.className='connection offline';connection.textContent=`Offline · ${pending} pending`;}
     else if(pending){connection.className='connection offline';connection.textContent=lastUploadError?`Upload issue · ${pending} pending`:`${pending} waiting to sync`;}
-    else{connection.className='connection online';connection.textContent='● Online · Ready';}
+    else{connection.className='connection online';connection.textContent='● Ready';}
   }
   window.addEventListener('online',()=>{updateConnection();flush();});window.addEventListener('offline',updateConnection);
   window.addEventListener('storage',updateConnection);
-  // Inline kiosk deployment: service worker registration disabled to avoid stale cached scripts.
+  // All survey logic is bundled into this HTML. Network-first offline cache supports kiosk startup.
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+  languagePicker.addEventListener('change',()=>chooseLanguage(languagePicker.value));
   updateConnection();welcome();if(live){flush();setInterval(flush,30000);}
 })();
 </script>
