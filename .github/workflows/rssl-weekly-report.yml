@@ -1,25 +1,15 @@
-name: RSSL Weekly Customer Insights Email
+name: RSSL Customer Insights — Manual Database Preview
 
+# Email sending moved to Google Apps Script due to Gmail SMTP disconnects
+# on GitHub runners (ports 465 and 587). No email is sent by this workflow.
 on:
-  schedule:
-    - cron: '17 9 * * 1'
-      timezone: 'Australia/Sydney'
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Preview the report in Actions logs without sending email'
-        type: boolean
-        default: true
 
 permissions:
   contents: read
 
-concurrency:
-  group: rssl-weekly-report
-  cancel-in-progress: false
-
 jobs:
-  email-report:
+  report-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -34,14 +24,7 @@ jobs:
           node survey/test_kiosk.js
           node survey/test_sw.js
           python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py'
-      - name: Generate report and send email
+      - name: Read Supabase and preview last completed week (no email)
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.RSSL_SUPABASE_SECRET_KEY }}
-          RSSL_GMAIL_APP_PASSWORD: ${{ secrets.RSSL_GMAIL_APP_PASSWORD }}
-          RSSL_REPORT_TO: ${{ secrets.RSSL_REPORT_TO }}
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
-            python scripts/rssl_weekly_report.py --dry-run
-          else
-            python scripts/rssl_weekly_report.py
-          fi
+        run: python scripts/rssl_weekly_report.py --dry-run
