@@ -93,8 +93,9 @@ function browser(mode='success', offline=false) {
       found[0].click();
     },
     language(lang) {
-      e['survey-language'].value = lang;
-      e['survey-language'].events.change();
+      const tiles = descendants(e.view, x => x.className === 'language-tile' && x.lang === lang);
+      assert.equal(tiles.length, 1, 'Language tile exists: ' + lang);
+      tiles[0].click();
     },
     queued() { return JSON.parse(localStorage.getItem('rssl-survey-pending-v1') || '[]'); },
   };
@@ -102,10 +103,10 @@ function browser(mode='success', offline=false) {
 const settle = async()=>{for(let i=0;i<40;i++)await Promise.resolve();};
 async function test() {
   const s=browser();
-  assert.equal(s.elements(x=>x.tag==='h1')[0].textContent, packs.en.ui[1]);
+  assert.equal(s.elements(x=>x.tag==='h1')[0].textContent, 'Choose your language');
+  assert.equal(s.elements(x=>x.className==='language-tile').length, 11, 'Eleven visible language tiles');
+  assert.equal(s.elements(x=>x.className==='welcome-logo').length, 1, 'Business logo on welcome');
   s.language('ja');
-  assert.equal(s.elements(x=>x.tag==='h1')[0].textContent, packs.ja.ui[1]);
-  s.click('big-button');
   assert.equal(s.elements(x=>x.tag==='h2')[0].textContent, packs.ja.q[0][0]);
   for(let i=0;i<5;i++)s.click('option');
   await settle();
@@ -119,11 +120,10 @@ async function test() {
   assert.equal(s.queued().length, 0, 'Successful response removed from queue');
   assert.equal(s.elements(x=>x.className.startsWith('note-box'))[0].textContent,packs.ja.ui[12]);
   s.click('big-button');
-  assert.equal(s.e['survey-language'].value, 'en', 'Next customer starts in English');
+  assert.equal(s.elements(x=>x.tag==='h1')[0].textContent, 'Choose your language', 'Next customer starts on language tiles');
 
   const off=browser('success',true);
   off.language('zh-CN');
-  off.click('big-button');
   for(let i=0;i<5;i++)off.click('option');
   await settle();
   assert.equal(off.calls.length,0,'No attempt while offline');
@@ -133,23 +133,23 @@ async function test() {
   assert.equal(off.queued().length,0,'Queued response removed on acknowledgement');
 
   const conflict=browser('conflict');
-  conflict.click('big-button');
+  conflict.language('en');
   for(let i=0;i<5;i++)conflict.click('option');
   await settle();
   assert.equal(conflict.queued().length,1,'Non-duplicate 409 is not swallowed');
 
   const duplicate=browser('duplicate');
-  duplicate.click('big-button');
+  duplicate.language('en');
   for(let i=0;i<5;i++)duplicate.click('option');
   await settle();
   assert.equal(duplicate.queued().length,0,'Real duplicate key is idempotent');
 
   const skipped=browser();
-  skipped.click('big-button');
+  skipped.language('en');
   for(let i=0;i<5;i++)skipped.click('link-button skip');
   await settle();
   assert.equal(skipped.calls.length,0,'All-skipped response not inserted');
 
-  console.log('PASS: 11 language packs, native UI, saved English codes, reset, offline retry, HTTP errors, empty response');
+  console.log('PASS: 11 language tiles, business logo, native UI, saved English codes, reset, offline retry, HTTP errors, empty response');
 }
 test().catch(error => {console.error(error);process.exitCode=1;});
