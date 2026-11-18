@@ -141,7 +141,7 @@ window.RSSL_CONFIG = {
   function el(tag,cls,txt){let n=document.createElement(tag); if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
   function panel(){const n=el('section','panel');view.replaceChildren(n);resetIdle();return n;}
   function clearTimers(){clearTimeout(idleHandle);clearTimeout(thanksHandle);}
-  function resetIdle(){clearTimeout(idleHandle);if(step>=0 && step<questions.length) idleHandle=setTimeout(welcome,75000);}
+  function resetIdle(){clearTimeout(idleHandle);if(step>=0 && step<questions.length) idleHandle=setTimeout(welcome,120000);}
   document.addEventListener('pointerdown',()=>{if(step>=0 && step<questions.length)resetIdle();},{passive:true});
   document.addEventListener('keydown',()=>{if(step>=0 && step<questions.length)resetIdle();});
 
