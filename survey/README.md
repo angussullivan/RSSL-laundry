@@ -52,6 +52,29 @@ Screen readability can vary with Android display zoom, font scaling and
 browser toolbar visibility. Test the shortest/longest translated question
 on the actual hardware before leaving the kiosk unattended.
 
+## Acquisition Survey V2 — safely staged (not yet active)
+
+On 18 November 2026, we added the complete 11-language acquisition upgrade behind
+`const ACQUISITION_V2_ENABLED = false` in `index.html`.
+
+- **Live survey** remains the original five questions and original Supabase payload.
+- **Non-saving V2 preview:** https://www.reservoirlaundry.com.au/survey/?preview_v2=1
+- **V2 first-timer flow:** initial discovery, Google navigation, decision driver,
+  local resident/worker versus traveller.
+- **V2 returning-customer flow:** initial discovery, Google navigation,
+  original experience and improvement questions.
+- **Prepared additive schema migration:** [ACQUISITION_V2_MIGRATION.sql](ACQUISITION_V2_MIGRATION.sql).
+- **Deployment steps:** [ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md).
+- **11-language V2 tests:** `node survey/test_acquisition_v2.js`.
+- **Gmail reporting:** New acquisition metrics are staged in
+  `scripts/RSSL_Weekly_Email_Apps_Script.gs` behind
+  `RSSL_ACQUISITION_V2_REPORT=false`. The private Apps Script does not sync
+  automatically from GitHub.
+
+A read-only schema preflight confirmed that the live RSSL database does **not**
+yet contain V2 fields. Do not enable either V2 flag until SQL migration, real
+insertion test and the updated Apps Script are ready.
+
 ## When the internet is down
 - A previously loaded survey can reopen via the service-worker cache.
 - Finished responses are saved to this tablet's local storage and retried every
