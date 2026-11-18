@@ -219,15 +219,36 @@ def send_email(label, text, html_body):
     msg["Subject"] = "RSSL | Weekly Customer Insights — " + label
     msg.set_content(text)
     msg.add_alternative(html_body, subtype="html")
+    # GitHub-hosted runners may have connectivity issues with port 465.
+    # Try Gmail submission over STARTTLS/587 when the SSL connection is
+    # disconnected. Never retry authentication failures or after a confirmed
+    # SMTP transaction, to avoid duplicate weekly emails.
     try:
         with smtplib.SMTP_SSL(
-            "smtp.gmail.com", 465, context=ssl.create_default_context(), timeout=30
+            "smtp.gmail.com", 465, context=ssl.create_default_context(), timeout=15
         ) as smtp:
             smtp.login(gmail_address, app_password)
             smtp.send_message(msg)
-    except (smtplib.SMTPException, OSError) as e:
+        channel = "465/SSL"
+    except (smtplib.SMTPServerDisconnected, TimeoutError, ConnectionError, OSError) as first_error:
+        print("Gmail SMTP 465 unavailable:", type(first_error).__name__, "- trying STARTTLS 587")
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as smtp:
+                smtp.ehlo()
+                smtp.starttls(context=ssl.create_default_context())
+                smtp.ehlo()
+                smtp.login(gmail_address, app_password)
+                smtp.send_message(msg)
+            channel = "587/STARTTLS"
+        except (smtplib.SMTPException, OSError) as retry_error:
+            raise RuntimeError(
+                "Gmail SMTP delivery failed on 465 and 587 ("
+                + type(retry_error).__name__
+                + "). Use Gmail API or Apps Script if runners cannot connect."
+            ) from None
+    except smtplib.SMTPException as e:
         raise RuntimeError("Gmail SMTP delivery failed (" + type(e).__name__ + ")") from None
-    print("Gmail SMTP accepted the weekly report for:", label)
+    print("Gmail SMTP accepted the weekly report over", channel, "for:", label)
 
 
 def main():
