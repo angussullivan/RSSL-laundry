@@ -28,6 +28,30 @@
    An in-progress form resets after **120 seconds** without interaction;
    the confirmation screen resets after **9 seconds**.
 
+## Galaxy Tab A11+ installation (landscape)
+
+The survey is tuned for the **Samsung Galaxy Tab A11+ Wi-Fi 128GB** in
+**landscape** (wide-screen) orientation:
+- Four columns of language-selection tiles (11 languages across three rows).
+- Three columns of large answer buttons in landscape so even the longest
+  question remains compact without tiny tap targets.
+- Compressed but readable header/logo and spacing at typical 16:10 tablet
+  viewport sizes, including shorter browser viewports.
+- Portrait styles remain as a graceful fallback, not the intended kiosk use.
+- The web-app manifest now asks for `landscape` when launched as an
+  installed standalone web app. Regular browser tabs may ignore this hint.
+
+For a fixed wall-mounted kiosk, rotate the Galaxy tablet to **landscape** and
+turn **Auto rotate off** in Android Quick Settings to keep that orientation.
+Open https://www.reservoirlaundry.com.au/survey/ in Chrome, or install the
+site to the home screen as a standalone web app. If a kiosk app is used,
+configure it to open this exact URL, show the page in immersive/full-screen,
+and prevent untrusted users from exiting.
+
+Screen readability can vary with Android display zoom, font scaling and
+browser toolbar visibility. Test the shortest/longest translated question
+on the actual hardware before leaving the kiosk unattended.
+
 ## When the internet is down
 - A previously loaded survey can reopen via the service-worker cache.
 - Finished responses are saved to this tablet's local storage and retried every
