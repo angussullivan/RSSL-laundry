@@ -211,11 +211,15 @@ function sendTestReportNow() {
   const now = new Date();
   const currentMonday = currentRsslMonday_(now);
   const previousMonday = addRsslDays_(currentMonday,-7);
+  const benchmarkStart = addRsslDays_(currentMonday,-42);
   const recent = rsslSurveyRows_(sydneyMidnightUtc_(currentMonday),now.toISOString());
-  const older = rsslSurveyRows_(sydneyMidnightUtc_(previousMonday),sydneyMidnightUtc_(currentMonday));
+  // For the partial-week test, benchmark the six previously completed weeks.
+  const sixWeek = rsslSurveyRows_(sydneyMidnightUtc_(benchmarkStart),sydneyMidnightUtc_(currentMonday));
+  const older = sixWeek.filter(r => r.submitted_at >= sydneyMidnightUtc_(previousMonday));
   const label = currentMonday + ' to ' + Utilities.formatDate(now,RSSL.timezone,'yyyy-MM-dd') + ' (week to date)';
-  rsslMail_(rsslBuildReport_(recent,older,label,true));
-  console.log('Test: ' + recent.length + ' survey responses from this week; ' + older.length + ' last week.');
+  const benchmarkLabel = benchmarkStart + ' to ' + addRsslDays_(currentMonday,-1);
+  rsslMail_(rsslBuildReport_(recent,older,sixWeek,label,true,benchmarkLabel));
+  console.log('Test: ' + recent.length + ' responses this week, 6-week sample: ' + sixWeek.length);
 }
 
 /** Called every Monday by the installable trigger. Previous complete Mon–Sun. */
@@ -225,19 +229,24 @@ function sendWeeklyRsslReport() {
   try {
     const thisMonday = currentRsslMonday_(new Date());
     const lastMonday = addRsslDays_(thisMonday,-7);
-    const earlierMonday = addRsslDays_(thisMonday,-14);
+    const olderMonday = addRsslDays_(thisMonday,-14);
+    const benchmarkStart = addRsslDays_(thisMonday,-42);
     const properties = PropertiesService.getScriptProperties();
     const key = 'RSSL_LAST_SENT_WEEK';
     if (properties.getProperty(key) === lastMonday) {
       console.log('Already sent report for ' + lastMonday + '; skipping duplicate.');
       return;
     }
-    const recent = rsslSurveyRows_(sydneyMidnightUtc_(lastMonday),sydneyMidnightUtc_(thisMonday));
-    const older = rsslSurveyRows_(sydneyMidnightUtc_(earlierMonday),sydneyMidnightUtc_(lastMonday));
+    const sixWeek = rsslSurveyRows_(sydneyMidnightUtc_(benchmarkStart),sydneyMidnightUtc_(thisMonday));
+    const lastWeekStartUtc = sydneyMidnightUtc_(lastMonday);
+    const olderStartUtc = sydneyMidnightUtc_(olderMonday);
+    const recent = sixWeek.filter(r => r.submitted_at >= lastWeekStartUtc);
+    const older = sixWeek.filter(r => r.submitted_at >= olderStartUtc && r.submitted_at < lastWeekStartUtc);
     const label = lastMonday + ' to ' + addRsslDays_(thisMonday,-1);
-    rsslMail_(rsslBuildReport_(recent,older,label,false));
+    const benchmarkLabel = benchmarkStart + ' to ' + addRsslDays_(thisMonday,-1);
+    rsslMail_(rsslBuildReport_(recent,older,sixWeek,label,false,benchmarkLabel));
     properties.setProperty(key,lastMonday);
-    console.log('Weekly report sent for ' + label + ' with ' + recent.length + ' responses.');
+    console.log('Weekly report sent for ' + label + ', 6-week sample: ' + sixWeek.length);
   } finally {
     lock.releaseLock();
   }
@@ -253,9 +262,9 @@ function installMondaySchedule() {
     .timeBased()
     .everyWeeks(1)
     .onWeekDay(ScriptApp.WeekDay.MONDAY)
-    .atHour(9)
-    .nearMinute(15)
+    .atHour(6)
+    .nearMinute(0)
     .inTimezone(RSSL.timezone)
     .create();
-  console.log('Weekly Monday Sydney-time trigger installed. Google runs near 09:15 (roughly ±15 minutes).');
+  console.log('Weekly Monday Sydney-time trigger installed. Google runs near 06:00 (roughly ±15 minutes).');
 }
