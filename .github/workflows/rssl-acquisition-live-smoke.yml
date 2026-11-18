@@ -1,0 +1,24 @@
+name: RSSL V2 Live Schema and Submission Test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rssl-acquisition-live-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Insert and remove synthetic V2 data using public and server keys
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.RSSL_SUPABASE_SECRET_KEY }}
+        run: python scripts/rssl_acquisition_smoke.py
