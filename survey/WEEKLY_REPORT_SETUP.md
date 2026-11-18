@@ -15,10 +15,9 @@ Follow the maintained step-by-step guide:
 Source file (public code, no secret):
 [`scripts/RSSL_Weekly_Email_Apps_Script.gs`](../scripts/RSSL_Weekly_Email_Apps_Script.gs)
 
-Until the owner creates and authorises the Apps Script project, **no weekly
-automated email is active**. The user can still run the
-`RSSL Customer Insights — Manual Database Preview` GitHub workflow for
-a read-only dry-run report, but it will not send email.
+The owner successfully authorised Google Apps Script, sent live test emails, and
+installed a **single time-driven trigger**. As of 18 November 2026 the active
+Gmail schedule is Monday at approximately **6:00am Sydney time**.
 
 ## Summary of the report
 
@@ -32,8 +31,21 @@ a read-only dry-run report, but it will not send email.
   paid ad producing an incremental paying customer.
 
 Reports use Sydney-local Monday–Sunday calendar boundaries. The installable
-Google trigger runs Monday mornings, usually near **9:15am Sydney time**,
+Google trigger runs Monday mornings, usually near **6:00am Sydney time**,
 with Google's permitted time variance.
+
+## Acquisition Survey V2 (staged, not yet live)
+
+A redesigned five-question, 11-language acquisition survey and corresponding
+Google Apps Script reporting code are committed to GitHub, but safely disabled
+until its additive Supabase migration is applied. See
+[ACQUISITION_V2_ROLLOUT.md](ACQUISITION_V2_ROLLOUT.md).
+After migration, enable the report flag in the source and copy updated code
+into the owner-controlled Apps Script editor; GitHub does not sync it.
+
+The existing email includes the six-week historical comparison. The V2 edition
+adds first-time channel, reason for choice, local-versus-visitor and language
+breakdowns with sample sizes.
 
 ## Security
 
