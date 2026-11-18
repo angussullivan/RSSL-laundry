@@ -24,11 +24,15 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout RSSL repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Run kiosk and reporting regression tests
+        run: |
+          node survey/test_kiosk.js
+          python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py'
       - name: Generate report and send email
         env:
           SUPABASE_SECRET_KEY: ${{ secrets.RSSL_SUPABASE_SECRET_KEY }}
