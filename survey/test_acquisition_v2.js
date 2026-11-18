@@ -1,11 +1,11 @@
-// Tests use mocked DOM and Supabase. Feature gate remains false in production.
+// Mocked DOM/Supabase regression tests: V2 is live, V1 remains testable for offline legacy queue.
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
 const match=html.match(/<script>\n(\(\(\) => \{[\s\S]*?\}\)\(\);)\n<\/script>/);
 assert.ok(match,'inline kiosk exists');
 const src=match[1];
-assert.ok(src.includes('const ACQUISITION_V2_ENABLED = false;'),'safe production gate is off');
+assert.ok(src.includes('const ACQUISITION_V2_ENABLED = true;'),'production acquisition V2 is enabled after live schema test');
 const packs=JSON.parse(src.match(/const ACQUISITION_PACKS = (\{[^\n]*\});/)[1]);
 assert.equal(Object.keys(packs).length,11);
 for(const [lang,p] of Object.entries(packs)){
@@ -36,7 +36,8 @@ function simulate(v2,preview){
   const posts=[];let counter=1;
   const crypto={randomUUID:()=> '00000000-0000-4000-8000-'+String(counter++).padStart(12,'0')};
   const fetch=async(url,opts)=>{posts.push(JSON.parse(opts.body));return{ok:true,status:201,text:async()=>''};};
-  const code=v2?src.replace('const ACQUISITION_V2_ENABLED = false;','const ACQUISITION_V2_ENABLED = true;'):src;
+  const code=src.replace(/const ACQUISITION_V2_ENABLED = (true|false);/,
+    'const ACQUISITION_V2_ENABLED = '+(v2?'true':'false')+';');
   new Function('window','document','navigator','self','crypto','fetch','localStorage','setTimeout',
     'clearTimeout','setInterval','AbortController','console',code)
     (win,doc,{onLine:true},{crypto},crypto,fetch,localStorage,()=>1,()=>{},()=>{},
