@@ -28,7 +28,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Test survey JavaScript, translation data and offline queue
-        run: node survey/test_kiosk.js
+        run: |
+          node survey/test_kiosk.js
           node survey/test_sw.js
       - name: Test reporting metrics, dates and mocked Gmail delivery
         run: python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py' -v
