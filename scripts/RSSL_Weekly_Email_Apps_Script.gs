@@ -6,9 +6,9 @@
  * 3) Run installMondaySchedule() exactly once to activate weekly sends
  * No Gmail App Password or SMTP required.
  */
-// Enable only after the RSSL Supabase additive migration has been applied.
-// Keep false while existing customer surveys continue to use V1.
-const RSSL_ACQUISITION_V2_REPORT = false;
+// V2 enabled after verified live Supabase migration, anonymous INSERT, and synthetic cleanup.
+// To deploy privately, copy this complete file into the owner-authorised Google Apps Script Code.gs.
+const RSSL_ACQUISITION_V2_REPORT = true;
 
 const RSSL = Object.freeze({
   projectUrl: 'https://mfsdnfhoifahvlsjzzxf.supabase.co',
