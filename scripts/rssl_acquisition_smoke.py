@@ -39,7 +39,31 @@ test_rows = [
         "choice_reason": None, "customer_context": None,
         "discovery_detail": None, "survey_language": "de", "survey_version": 2,
     },
+    {
+        # Old V1 submission still has to work after the additive migration,
+        # including an existing offline-queued response.
+        "submission_id": str(uuid.uuid4()), "answered_at": now,
+        "visit_type": "first", "discovery_source": "google_maps",
+        "google_today": "search", "experience": "excellent",
+        "improvement": "nothing",
+    },
 ]
+
+def verify_no_anonymous_read(submission_id):
+    # An anonymous client must never be able to retrieve private survey data.
+    req = urllib.request.Request(
+        filtered(submission_id), method="GET",
+        headers={"apikey": CLIENT_KEY, "Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as res:
+            rows = json.loads(res.read().decode("utf-8"))
+        if rows:
+            raise RuntimeError("SECURITY: anonymous public key can read survey responses")
+    except urllib.error.HTTPError as exc:
+        if exc.code not in (401, 403):
+            raise RuntimeError("Unexpected public read probe HTTP " + str(exc.code)) from None
+    print("Anonymous SELECT: blocked/empty as expected")
 
 def request(method, key, url, payload=None):
     headers = {"apikey": key, "Content-Type": "application/json",
@@ -65,7 +89,8 @@ try:
         if status not in (200, 201, 204):
             raise RuntimeError("Unexpected public insert HTTP " + str(status))
         created.append(record["submission_id"])
-        print("Anonymous browser-style V2 INSERT for branch " + str(index + 1) + ": accepted")
+        print("Anonymous browser-style INSERT for case " + str(index + 1) + ": accepted")
+        verify_no_anonymous_read(record["submission_id"])
         status, body = request("GET", SERVER_KEY, filtered(record["submission_id"]))
         found = json.loads(body)
         if status != 200 or len(found) != 1:
@@ -90,4 +115,4 @@ finally:
             print("WARNING: Test record cleanup could not be confirmed:", type(err).__name__)
             raise
 
-print("PASS: live public-key INSERT, V2 schema, readback, and synthetic record cleanup.")
+print("PASS: public key INSERT (V2 first/return + V1 legacy), anonymous SELECT denied, readback, and test-row cleanup.")
