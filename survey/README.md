@@ -8,15 +8,18 @@
 - Do not edit `survey/app.js`, `survey/config.js` or `survey/styles.css`:
   they were retired and removed to avoid having conflicting versions.
 - The small `sw.js` service worker enables offline re-opening of the survey after
-  the first online visit. The cache is network-first and specific to `/survey/`.
+  the first online visit. The cache is network-first and specific to `/survey/`, plus the shared logo asset.
 - `survey/manifest.webmanifest` and `icon.svg` provide installable-app metadata.
 
 ## Customer flow
-1. Each customer sees an English welcome screen.
-2. Use the language dropdown to switch to any of 11 languages:
+1. Each customer sees the circular business logo and **11 large language tiles**.
+   The logo reuses the existing main-site asset `../IMG_7178.jpeg`.
+2. Tap a tile to immediately start question 1 in that language:
    English, 简体中文, 繁體中文, 日本語, 한국어, हिन्दी, Bahasa Indonesia,
-   Español, Français, Português, Deutsch.
+   Español, Français, Português, Deutsch. No small dropdown is required.
 3. Five anonymous questions follow; every question can be skipped.
+   A small **Languages** control on question screens returns to language selection,
+   clearing unfinished answers rather than mixing responses between customers.
 4. The form sends **only English-coded choice values** (e.g. `google_maps`) and
    timestamps to the Supabase `public.rssl_customer_surveys` table.
    Translations never alter the database schema or reporting calculations.
