@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - '.github/workflows/rssl-acquisition-live-smoke.yml'
+      - 'scripts/rssl_acquisition_smoke.py'
   workflow_dispatch:
 
 permissions:
