@@ -1,0 +1,31 @@
+name: RSSL One-Time Gmail STARTTLS Test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rssl-email-test-starttls-once.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rssl-weekly-report
+  cancel-in-progress: false
+
+jobs:
+  test-and-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run automated report checks
+        run: python -m unittest discover -s scripts -p 'test_rssl_weekly_report.py'
+      - name: Send report through Gmail using port 465 or 587
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.RSSL_SUPABASE_SECRET_KEY }}
+          RSSL_GMAIL_APP_PASSWORD: ${{ secrets.RSSL_GMAIL_APP_PASSWORD }}
+          RSSL_REPORT_TO: ${{ secrets.RSSL_REPORT_TO }}
+        run: python scripts/rssl_weekly_report.py
