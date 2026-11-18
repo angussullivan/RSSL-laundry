@@ -105,7 +105,7 @@ function rsslReadWeek_(startDate, endDate, secret) {
 
   for (let page = 0; page < 50; page++) {
     const params = 'select=' + encodeURIComponent(RSSL_FIELDS)
-      + '&and=' + encodeURIComponent(range.slice(4, -1))
+      + '&and=' + encodeURIComponent(range.slice(4))
       + '&order=submitted_at.asc,submission_id.asc'
       + '&limit=1000&offset=' + (page * 1000);
     const url = RSSL_SUPABASE_URL + '/rest/v1/' + RSSL_TABLE + '?' + params;
