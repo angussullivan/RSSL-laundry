@@ -150,6 +150,16 @@ assert.ok(details.text.includes('Convenient location: 1 (50%)'),
 assert.ok(details.text.includes('Staying nearby (accommodation): 1 (50%)'));
 assert.ok(details.text.includes('Japanese: 1 (33%)'),'Language counts include all respondents');
 assert.ok(details.text.includes('n=2'),'First-time denominators visible');
+const rated=[
+  {...sample[0],survey_version:2,experience:null},
+  {...sample[1],survey_version:1,experience:'excellent'},
+  {...sample[2],survey_version:2,experience:'needs_work'}
+];
+const ratedReport=v2.rsslBuildReport_(rated,rated,rated,'v2 rated week',false,'six weeks');
+assert.ok(ratedReport.body.includes('Good or Excellent (returning customers, V2 only)'),
+  'Satisfaction metric explicitly identifies V2 returning sample');
+assert.ok(ratedReport.body.includes('0 / 1 (0%)'),
+  'First-time and V1 satisfaction responses do not distort V2 returning rates');
 assert.ok(v2.rsslBuildReport_(sample,sample,sample,'test week',false,'six weeks')
   .htmlBody.includes('Why first-time customers chose RSSL'),
   'New acquisition blocks appear in upgraded weekly email');
