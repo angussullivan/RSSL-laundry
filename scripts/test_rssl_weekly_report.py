@@ -70,9 +70,10 @@ class WeeklyReportTests(unittest.TestCase):
     def test_server_api_key_header_and_bounded_week(self):
         import datetime as dt
         seen = []
+        response_data = self.survey
         class FakeResponse:
             def __enter__(self):
-                return io.BytesIO(json.dumps(self.survey).encode())
+                return io.BytesIO(json.dumps(response_data).encode())
             def __exit__(self, *args):
                 return False
         def fake_urlopen(req, timeout=None):
