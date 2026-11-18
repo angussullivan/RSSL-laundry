@@ -4,11 +4,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="application-name" content="RSSL Customer Survey">
   <meta name="theme-color" content="#0b3939">
   <meta name="description" content="Anonymous 20-second customer survey for Reservoir Street Self Service Laundry.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+  <style>
+:root { font-family: system-ui,-apple-system, BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; color:#102928; background:#e8f0ec; font-synthesis:none; }
+* { box-sizing:border-box; } html,body{height:100%;margin:0} body{min-height:100dvh}
+button{font:inherit;touch-action:manipulation;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.app-shell{min-height:100dvh;display:flex;flex-direction:column;max-width:1300px;margin:auto;background:#fbfaf6;box-shadow:0 0 45px #143e3720}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;background:#0b3939;color:#fff;padding:22px clamp(18px,4vw,54px)}
+.brand{display:flex;align-items:center;gap:15px}.brand-mark{width:53px;height:53px;color:#c5efde;flex:none}.brand-mark svg{width:100%;height:100%}.brand-name{font-size:clamp(15px,2.1vw,21px);font-weight:850;letter-spacing:.13em}.brand-sub{margin-top:5px;font-size:clamp(9px,1.25vw,12px);letter-spacing:.11em;color:#cbe8df}
+.connection{font-size:13px;padding:7px 12px;border:1px solid #ffffff55;border-radius:40px;white-space:nowrap}.connection.offline{color:#ffd29b;border-color:#eeb16d}.connection.online{color:#aff5c2}.connection.preview{color:#ffcf8a}
+.setup-banner{background:#ffe5b8;color:#603812;padding:9px 26px;text-align:center;font-size:13px}
+.view{flex:1;display:flex;justify-content:center;align-items:center;padding:clamp(24px,4vh,48px) clamp(20px,6vw,75px)}.panel{width:100%;max-width:960px;animation:rise .26s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:13px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;color:#326f61;margin:0 0 14px}
+h1{font-size:clamp(38px,6vw,67px);font-weight:780;letter-spacing:-.055em;line-height:1.07;margin:0;max-width:850px}p.subtitle{font-size:clamp(19px,2.35vw,26px);color:#526d67;line-height:1.4;margin:24px 0 35px;max-width:750px}
+.hero-symbol{display:flex;align-items:center;gap:18px;margin-bottom:36px}.hero-symbol span{border-radius:22px;background:#e5f4ed;display:grid;place-items:center;width:66px;height:66px;font-size:32px}
+.big-button{display:inline-flex;justify-content:center;align-items:center;gap:12px;min-height:78px;padding:18px 45px;border:0;border-radius:18px;background:#0b5a50;color:white;font-size:24px;font-weight:780;box-shadow:0 6px 18px #13493a24}.big-button:active{transform:scale(.99)}.big-button:focus-visible,.option:focus-visible,.link-button:focus-visible{outline:4px solid #dbab53;outline-offset:3px}
+.muted{color:#69827b;font-size:15px;margin-top:22px}.question-head{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:15px}.step{color:#406f64;font-size:16px;font-weight:800}.progress{display:flex;gap:8px;width:240px;max-width:45%}.progress b{height:7px;border-radius:20px;background:#e4eae6;flex:1}.progress b.active{background:#0d7662}
+.question{font-size:clamp(31px,4.8vw,53px);font-weight:780;letter-spacing:-.05em;line-height:1.12;margin:0 0 14px}.help{font-size:17px;color:#60776e;margin:0 0 23px}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.option{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:18px 24px;border:2px solid #d4e4dc;background:white;color:#173e38;border-radius:18px;min-height:84px;font-size:clamp(18px,2.1vw,23px);font-weight:720;line-height:1.25;box-shadow:0 1px 5px #19352b0d}.option:after{content:"↗";font-size:23px;font-weight:500;color:#89aca1;flex:none;margin-left:10px}.option:active{background:#dceddf;border-color:#0b7763}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:25px}.link-button{border:0;background:none;padding:15px 5px;color:#47685c;text-decoration:underline;text-underline-offset:4px;font-size:17px}.skip{margin-left:auto}
+.complete-mark{width:80px;height:80px;display:grid;place-items:center;font-size:43px;color:#fff;background:#0f8069;border-radius:50%;margin-bottom:27px}
+.note-box{background:#e9f5ef;border-left:5px solid #0f8069;border-radius:9px;padding:12px 16px;color:#406056;margin:30px 0;font-size:16px}.note-box.warn{border-color:#db8c25;background:#fff2db}
+.footer{padding:15px clamp(18px,4vw,54px);display:flex;justify-content:space-between;gap:20px;color:#647b72;border-top:1px solid #e7ece6;font-size:12px}
+@media(max-width:700px){.topbar{padding:14px 18px}.brand-mark{width:42px;height:42px}.brand-sub{font-size:9px}.connection{font-size:10px;padding:5px 7px}.view{align-items:flex-start;padding:28px 20px}.options{grid-template-columns:1fr;gap:10px}.option{min-height:66px;padding:13px 18px;font-size:19px}.big-button{width:100%;min-height:70px}.footer{font-size:10px;flex-direction:column;gap:4px}p.subtitle{margin:20px 0 26px}.hero-symbol{margin-bottom:22px}.question{font-size:34px}}
+@media(max-height:650px) and (min-width:700px){.view{padding-top:15px;padding-bottom:15px}.option{min-height:64px;padding:11px 20px}.options{gap:10px}.question{font-size:38px}.help{margin-bottom:12px}.topbar{padding-top:10px;padding-bottom:10px}.footer{padding-top:7px;padding-bottom:7px}}
+@media(prefers-reduced-motion:reduce){.panel{animation:none}}
+
+</style>
   <title>Reservoir Street Laundry · Customer survey</title>
 </head>
 <body>
@@ -25,11 +52,111 @@
 
     <div id="setup-banner" class="setup-banner" hidden><strong>PREVIEW MODE</strong> — Survey works, but answers are not stored. Connect Supabase before using with customers.</div>
 
-    <main id="view" class="view" aria-live="polite"></main>
+    <main id="view" class="view" aria-live="polite"><section class="panel"><h1>How did you find us?</h1><p class="subtitle">The survey is starting. If this message remains, please refresh the page.</p></section></main>
 
     <footer class="footer"><span>Anonymous survey · No name or contact details requested</span><span>67 Reservoir Street, Surry Hills</span></footer>
   </div>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script>
+window.addEventListener('error', function(e) {
+  var conn = document.getElementById('connection');
+  var view = document.getElementById('view');
+  if (conn && conn.textContent === 'Checking connection') {
+    conn.textContent = 'Survey loading error';
+    if (view) { view.textContent = 'The survey could not start. Please refresh this page. If this continues, contact staff.'; }
+  }
+});
+</script>
+<script>
+// PUBLIC browser configuration. Use only the Supabase publishable key.
+// Never place your Supabase secret key, database password or service-role key here.
+window.RSSL_CONFIG = {
+  supabaseUrl: 'https://mfsdnfhoifahvlsjzzxf.supabase.co',
+  publishableKey: 'sb_publishable_FOhCuYIbI-jyBeMecTG98g_VpzN276d'
+};
+
+</script>
+<script>
+(() => {
+  'use strict';
+  const cfg = window.RSSL_CONFIG || {};
+  const live = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(cfg.supabaseUrl || '') && !!cfg.publishableKey;
+  const ENDPOINT = live ? cfg.supabaseUrl.replace(/\/$/,'') + '/rest/v1/rssl_customer_surveys' : '';
+  const QUEUE_KEY = 'rssl-survey-pending-v1';
+  const questions = [
+    {key:'visit_type', title:'Is this your first visit?', help:'Tap one answer. There are just five quick questions.', choices:[['first','Yes, first time'],['repeat','No, I’ve been before'],['unsure','Prefer not to say']]},
+    {key:'discovery_source', title:'How did you first hear about us?', help:'Think about when you originally discovered this laundry.', choices:[['google_maps','Google Maps'],['google_search','Google Search'],['walk_by','Walking past'],['recommendation','Friend or family'],['other','Something else'],['unsure','Can’t remember']]},
+    {key:'google_today', title:'Did you use Google to find us today?', help:'This includes checking the address or requesting directions.', choices:[['maps','Yes — Google Maps'],['search','Yes — Google Search'],['both','Yes — both'],['no','No'],['unsure','Not sure']]},
+    {key:'experience', title:'How has your visit been?', help:'No problem if you have only just arrived.', choices:[['excellent','Excellent'],['good','Good'],['needs_work','Could be better'],['not_finished','I haven’t finished yet']]},
+    {key:'improvement', title:'What could we improve?', help:'Optional — choose the most important thing, or skip.', choices:[['nothing','Nothing — all good'],['machines','Machine availability'],['cleanliness','Cleanliness'],['prices','Pricing'],['payment','Card payment'],['instructions','Instructions / signage'],['other','Something else']]}
+  ];
+  const view=document.getElementById('view'), connection=document.getElementById('connection'), banner=document.getElementById('setup-banner');
+  let step=-1, answers={}, idleHandle=null, thanksHandle=null, sending=false, lastUploadError=false;
+  if (!live) banner.hidden=false;
+  function el(tag,cls,txt){let n=document.createElement(tag); if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
+  function panel(){const n=el('section','panel');view.replaceChildren(n);resetIdle();return n;}
+  function clearTimers(){clearTimeout(idleHandle);clearTimeout(thanksHandle);}
+  function resetIdle(){clearTimeout(idleHandle);if(step>=0 && step<questions.length) idleHandle=setTimeout(welcome,75000);}
+  document.addEventListener('pointerdown',()=>{if(step>=0 && step<questions.length)resetIdle();},{passive:true});
+  document.addEventListener('keydown',()=>{if(step>=0 && step<questions.length)resetIdle();});
+  function welcome(){clearTimers();step=-1;answers={};const p=panel();
+    const hero=el('div','hero-symbol'),sym=el('span','','✦');hero.append(sym,el('p','eyebrow','A little feedback makes a big difference'));p.append(hero);
+    p.append(el('h1','', 'How did you find us?'),el('p','subtitle','Help your local laundromat get better. Five quick taps, around 20 seconds. No personal details.'));
+    const b=el('button','big-button','Start survey  →');b.type='button';b.addEventListener('click',()=>renderQuestion(0));p.append(b,el('p','muted','Thank you for supporting an independent neighbourhood business.'));
+  }
+  function renderQuestion(idx){clearTimeout(thanksHandle);step=idx;const q=questions[idx],p=panel();
+    const h=el('div','question-head');h.append(el('span','step',`QUESTION ${idx+1} OF ${questions.length}`));const prog=el('div','progress');prog.setAttribute('aria-label',`Question ${idx+1} of ${questions.length}`);questions.forEach((_,i)=>prog.append(el('b',i<=idx?'active':'')));h.append(prog);p.append(h,el('h2','question',q.title),el('p','help',q.help));
+    const opts=el('div','options');q.choices.forEach(([value,label])=>{let b=el('button','option',label);b.type='button';b.addEventListener('click',()=>select(value));opts.append(b);});p.append(opts);
+    const actions=el('div','actions');const back=el('button','link-button',idx===0?'Cancel':'← Back');back.type='button';back.addEventListener('click',()=>idx===0?welcome():renderQuestion(idx-1));actions.append(back);
+    const skip=el('button','link-button skip',idx===4?'Skip & finish':'Skip this question →');skip.type='button';skip.addEventListener('click',()=>select(null));actions.append(skip);p.append(actions);
+  }
+  function select(value){if(step<0||step>=questions.length||sending)return;answers[questions[step].key]=value;const next=step+1;if(next<questions.length)renderQuestion(next);else submit();}
+  function uuid(){if(self.crypto&&crypto.randomUUID)return crypto.randomUUID();throw new Error('Secure context required for new submissions');}
+  function loadQueue(){try{const x=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
+  function saveQueue(q){localStorage.setItem(QUEUE_KEY,JSON.stringify(q.slice(-250)));}
+  async function send(payload){
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),12000);
+    try {
+      const res=await fetch(ENDPOINT,{method:'POST',mode:'cors',cache:'no-store',signal:controller.signal,headers:{'apikey':cfg.publishableKey,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});
+      if(res.ok||res.status===409)return true;
+      const message=await res.text().catch(()=>'');
+      throw new Error(`Submission failed (${res.status}): ${message.substring(0,250)}`);
+    } finally { clearTimeout(timeout); }
+  }
+  let syncing=false;
+  async function flush(){if(!live||syncing||!navigator.onLine)return;syncing=true;try{
+    const queued=loadQueue();
+    for(const payload of queued){
+      try{
+        await send(payload);
+        lastUploadError=false;
+        saveQueue(loadQueue().filter(item=>item.submission_id!==payload.submission_id));
+      }catch(e){lastUploadError=true; console.error(e);break;}
+    }
+  }finally{syncing=false;updateConnection()}}
+  async function submit(){if(sending)return;sending=true;const snapshot={...answers};clearTimers();step=questions.length;const p=panel();
+    let result='demo';
+    if(live){try{const payload={submission_id:uuid(),answered_at:new Date().toISOString(),visit_type:snapshot.visit_type??null,discovery_source:snapshot.discovery_source??null,google_today:snapshot.google_today??null,experience:snapshot.experience??null,improvement:snapshot.improvement??null};
+      const pending=loadQueue();pending.push(payload);saveQueue(pending);result='queued';
+      if(navigator.onLine){await flush();result=loadQueue().some(a=>a.submission_id===payload.submission_id)?'queued':'saved';}
+    }catch(e){console.error(e);result='problem';}}
+    p.append(el('div','complete-mark','✓'),el('h1','', 'Thank you!'),el('p','subtitle','Your feedback helps make Reservoir Street Laundry better for everyone.'));
+    const msg=el('div','note-box'+((result==='queued'||result==='problem')?' warn':''));
+    msg.textContent=result==='saved'?'Your anonymous response was received.':result==='queued'?(navigator.onLine?'Response saved on this tablet, but upload is not yet confirmed. Staff should check the connection.':'Response saved on this tablet. It will upload when the connection returns.'):result==='demo'?'Preview only — your answers were not saved.':'A device storage error occurred; please check setup.';p.append(msg);
+    const b=el('button','big-button','Finish');b.addEventListener('click',welcome);p.append(b,el('p','muted','This screen resets automatically for the next customer.'));
+    thanksHandle=setTimeout(welcome,9000);sending=false;updateConnection();
+  }
+  function updateConnection(){
+    if(!live){connection.className='connection preview';connection.textContent='Preview';return;}
+    let pending=loadQueue().length;if(!navigator.onLine){connection.className='connection offline';connection.textContent=`Offline · ${pending} pending`;}
+    else if(pending){connection.className='connection offline';connection.textContent=lastUploadError?`Upload issue · ${pending} pending`:`${pending} waiting to sync`;}
+    else{connection.className='connection online';connection.textContent='● Online · Ready';}
+  }
+  window.addEventListener('online',()=>{updateConnection();flush();});window.addEventListener('offline',updateConnection);
+  window.addEventListener('storage',updateConnection);
+  // Inline kiosk deployment: service worker registration disabled to avoid stale cached scripts.
+  updateConnection();welcome();if(live){flush();setInterval(flush,30000);}
+})();
+</script>
 </body>
 </html>
