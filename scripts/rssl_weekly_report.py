@@ -19,7 +19,7 @@ SYDNEY = ZoneInfo("Australia/Sydney")
 URL = "https://mfsdnfhoifahvlsjzzxf.supabase.co"
 TABLE = "rssl_customer_surveys"
 TO_KEY = "RSSL_REPORT_TO"
-API_KEY = "SUPABASE_SERVICE_ROLE_KEY"
+API_KEY = "SUPABASE_SECRET_KEY"
 DISPLAY = {
     "google_maps": "Google Maps",
     "google_search": "Google Search",
@@ -80,7 +80,6 @@ def read_week(start, end, key):
     endpoint = URL + "/rest/v1/" + TABLE + "?" + params + "&" + upper
     req = urllib.request.Request(endpoint, headers={
         "apikey": key,
-        "Authorization": "Bearer " + key,
         "Accept": "application/json",
     })
     try:
