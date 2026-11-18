@@ -125,4 +125,33 @@ const after=sent.length;
 functions.sendWeeklyRsslReport();
 assert.equal(sent.length,after,'Duplicate weekly send suppressed');
 assert.ok(props.get('RSSL_LAST_SENT_WEEK'));
+// Simulate the upgraded backend without changing production's safe-off flag.
+const v2Source=source.replace('const RSSL_ACQUISITION_V2_REPORT = false;',
+                              'const RSSL_ACQUISITION_V2_REPORT = true;');
+assert.notEqual(v2Source,source,'V2 reporting flag can be enabled after migration');
+const v2=new Function('PropertiesService','Utilities','MailApp','UrlFetchApp',
+  'Session','LockService','ScriptApp',v2Source+
+  '\nreturn {rsslAcquisitionDetails_,rsslBuildReport_};')
+  (PropertiesService,Utilities,MailApp,urlFetch,Session,LockService,ScriptApp);
+const sample=[
+  {visit_type:'first',discovery_source:'other',discovery_detail:'host_referral',
+    choice_reason:'location',customer_context:'staying_nearby',survey_language:'ja'},
+  {visit_type:'first',discovery_source:'google_maps',discovery_detail:null,
+    choice_reason:'reviews',customer_context:'resident',survey_language:'en'},
+  {visit_type:'repeat',discovery_source:'other',discovery_detail:'apple_maps',
+    choice_reason:null,customer_context:null,survey_language:'fr'}
+];
+const details=v2.rsslAcquisitionDetails_(sample,sample);
+assert.ok(details.text.includes('Accommodation host / hotel: 1 (50%)'),
+  'Accommodation referrals distinguished from legacy other channel');
+assert.ok(details.text.includes('Google Maps: 1 (50%)'));
+assert.ok(details.text.includes('Convenient location: 1 (50%)'),
+  'First-time reasons exclude returners and skipped questions');
+assert.ok(details.text.includes('Staying nearby (accommodation): 1 (50%)'));
+assert.ok(details.text.includes('Japanese: 1 (33%)'),'Language counts include all respondents');
+assert.ok(details.text.includes('n=2'),'First-time denominators visible');
+assert.ok(v2.rsslBuildReport_(sample,sample,sample,'test week',false,'six weeks')
+  .htmlBody.includes('Why first-time customers chose RSSL'),
+  'New acquisition blocks appear in upgraded weekly email');
+
 console.log('PASS: 6-week average, pooled rates, 6am Monday trigger, DST, Supabase and Gmail, duplicate suppression');
