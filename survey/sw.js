@@ -1,4 +1,49 @@
-const CACHE='rssl-survey-app-v1';const ASSETS=['./','./index.html','./styles.css','./app.js','./config.js','./icon.svg','./manifest.webmanifest'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET'||new URL(req.url).origin!==self.location.origin)return;e.respondWith(fetch(req).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy));}return res;}).catch(()=>caches.match(req)));});
+/* Network-first, single-file RSSL kiosk shell. Only the survey scope is cached. */
+const CACHE = 'rssl-kiosk-v3';
+const SHELL = ['./index.html', './icon.svg', './manifest.webmanifest'];
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => cache.addAll(SHELL))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(key => key.startsWith('rssl-') && key !== CACHE)
+        .map(key => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  const url = new URL(request.url);
+  if (request.method !== 'GET' ||
+      url.origin !== self.location.origin ||
+      !url.pathname.startsWith(SCOPE_PATH)) return;
+
+  event.respondWith(
+    (async () => {
+      const cache = await caches.open(CACHE);
+      const isPage = request.mode === 'navigate';
+      const offlineFallback = () => cache.match(isPage ? './index.html' : request);
+      try {
+        const response = await fetch(request);
+        if (response.ok) {
+          // Cache a single canonical document, not one copy per query parameter.
+          await cache.put(isPage ? './index.html' : request, response.clone());
+        }
+        return response;
+      } catch (err) {
+        const cached = await offlineFallback();
+        if (cached) return cached;
+        throw err;
+      }
+    })()
+  );
+});
