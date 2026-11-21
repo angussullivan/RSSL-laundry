@@ -8,6 +8,9 @@ on:
       - 'survey/test_kiosk.js'
       - 'survey/test_acquisition_v2.js'
       - 'survey/test_sw.js'
+      - 'google-tag-config.js'
+      - 'scripts/test_google_tag.js'
+      - 'index.html'
       - 'scripts/rssl_weekly_report.py'
       - 'scripts/test_rssl_weekly_report.py'
       - 'scripts/RSSL_Weekly_Email_Apps_Script.gs'
@@ -35,6 +38,7 @@ jobs:
           node survey/test_kiosk.js
           node survey/test_acquisition_v2.js
           node survey/test_sw.js
+          node scripts/test_google_tag.js
       - name: Validate Google Apps Script Monday email sender and DST boundaries
         run: node scripts/test_apps_script.js
       - name: Compile live integration probes without sending data
