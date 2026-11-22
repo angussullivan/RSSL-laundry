@@ -7,7 +7,7 @@ assert.ok(match,'inline kiosk exists');
 const src=match[1];
 assert.ok(src.includes('const ACQUISITION_V2_ENABLED = true;'),'production acquisition V2 is enabled after live schema test');
 const packs=JSON.parse(src.match(/const ACQUISITION_PACKS = (\{[^\n]*\});/)[1]);
-assert.equal(Object.keys(packs).length,11);
+assert.equal(Object.keys(packs).length,12);
 for(const [lang,p] of Object.entries(packs)){
   for(const [key,n] of [['q2',10],['q4',10],['q5',7]]){
     assert.equal(p[key].length,n,lang+' '+key+' choices');
@@ -76,8 +76,10 @@ async function settle(){for(let i=0;i<55;i++)await Promise.resolve();}
     assert.equal(p.improvement,null);
     assert.equal(p.survey_version,2);
     assert.equal(p.survey_language,code);
+    assert.equal(s.doc.documentElement.dir, code==='ar'?'rtl':'ltr', code+' direction');
     s.click('big-button');
-    assert.equal(s.find('language-tile').length,11,'reset to language choice');
+    assert.equal(s.find('language-tile').length,12,'reset to language choice');
+    assert.equal(s.doc.documentElement.dir,'ltr','reset returns to left-to-right');
     assert.equal(s.doc.documentElement.lang,'en');
   }
   const r=simulate(true,false);r.lang('fr');r.click('option',1); // returning
@@ -168,5 +170,21 @@ async function settle(){for(let i=0;i<55;i++)await Promise.resolve();}
   }
   const legacy=simulate(false,false); legacy.lang('en');
   assert.equal(progressOf(legacy).text,'Question 1 of 5');
-  console.log('PASS: eleven language acquisition branches, new/returning records, preview no-write and legacy production');
+  const ar=simulate(true,false); ar.lang('ar');
+  assert.equal(ar.doc.documentElement.lang,'ar');
+  assert.equal(ar.doc.documentElement.dir,'rtl');
+  assert.equal(progressOf(ar).text.replace(/[\u2066\u2069]/g,''),'السؤال 1 من 5');
+  ar.click('option',0);
+  const ar2=progressOf(ar);
+  assert.equal(ar2.text.replace(/[\u2066\u2069]/g,''),'السؤال 2 من 5');
+  assert.equal(ar2.width,40);
+  assert.equal(ar.posts.length,0,'progress check does not submit early');
+  await settle();
+  ar.click('option',0); ar.click('option',0); ar.click('option',0); ar.click('option',0);
+  await settle();
+  assert.equal(ar.posts.length,1);
+  assert.equal(ar.posts[0].survey_language,'ar');
+  assert.equal(ar.posts[0].survey_version,2);
+  assert.equal(ar.posts[0].visit_type,'first');
+  console.log('PASS: twelve language acquisition branches, new/returning records, preview no-write and legacy production');
 })().catch(e=>{console.error(e);process.exitCode=1;});

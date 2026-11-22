@@ -15,7 +15,7 @@ const translated = code.match(/const LANGUAGE_PACKS = (\{[^\n]*\});/);
 assert.ok(translated, 'Embedded language translations exist');
 const packs = JSON.parse(translated[1]);
 const questionSizes = [5, 8, 7, 6, 9];
-assert.equal(Object.keys(packs).length, 11, '11 selectable languages including English');
+assert.equal(Object.keys(packs).length, 12, '12 selectable languages including English and Arabic');
 for (const [language, data] of Object.entries(packs)) {
   assert.equal(data.ui.length, 21, language + ' has complete interface');
   assert.equal(data.q.length, 5, language + ' has five questions');
@@ -134,7 +134,7 @@ const settle = async()=>{for(let i=0;i<40;i++)await Promise.resolve();};
 async function test() {
   const s=browser();
   assert.equal(s.elements(x=>x.tag==='h1')[0].textContent, 'Choose your language');
-  assert.equal(s.elements(x=>x.className==='language-tile').length, 11, 'Eleven visible language tiles');
+  assert.equal(s.elements(x=>x.className==='language-tile').length, 12, 'Twelve visible language tiles');
   assert.equal(s.elements(x=>x.className==='welcome-logo').length, 1, 'Business logo on welcome');
   s.language('ja');
   assert.equal(s.elements(x=>x.tag==='h2')[0].textContent, packs.ja.q[0][0]);
@@ -180,6 +180,6 @@ async function test() {
   await settle();
   assert.equal(skipped.calls.length,0,'All-skipped response not inserted');
 
-  console.log('PASS: Galaxy Tab A11+ viewport rules, 11 languages, logo, English response codes, reset, offline retry and error handling');
+  console.log('PASS: Galaxy Tab A11+ viewport rules, 12 languages, logo, English response codes, reset, offline retry and error handling');
 }
 test().catch(error => {console.error(error);process.exitCode=1;});
