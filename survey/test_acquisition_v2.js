@@ -114,5 +114,59 @@ async function settle(){for(let i=0;i<55;i++)await Promise.resolve();}
   await settle();assert.equal(old.posts.length,1);
   assert.ok(!Object.hasOwn(old.posts[0],'survey_version'),'old production payload preserved');
   assert.ok(!Object.hasOwn(old.posts[0],'choice_reason'));
+
+  function progressOf(s){
+    const label=all(s.elements.view,n=>n.className==='survey-progress-label')[0];
+    const fill=all(s.elements.view,n=>n.className==='survey-progress-fill')[0];
+    const track=all(s.elements.view,n=>n.className==='survey-progress-track')[0];
+    assert.ok(label&&fill&&track,'progress indicator is shown on a question');
+    const width=Number(String(fill.style).match(/width:(\d+)%/)[1]);
+    const now=Number(track['aria-valuenow']);
+    const max=Number(track['aria-valuemax']);
+    assert.equal(width, Math.round(now/max*100));
+    assert.ok(now>=1 && now<=max && width<=100, 'step stays inside the active path');
+    return {text:label.textContent, now, max, width};
+  }
+  const en=simulate(true,false); en.lang('en');
+  const forward=[progressOf(en)];
+  for(let i=0;i<4;i++){ en.click('option',0); forward.push(progressOf(en)); }
+  assert.deepEqual(forward.map(p=>p.text),[
+    'Question 1 of 5','Question 2 of 5','Question 3 of 5','Question 4 of 5','Question 5 of 5'
+  ]);
+  assert.deepEqual(forward.map(p=>p.width),[20,40,60,80,100]);
+  for(let i=1;i<forward.length;i++){
+    assert.equal(forward[i].now, forward[i-1].now+1, 'forward steps do not jump');
+    assert.equal(forward[i].max, 5);
+  }
+  const back=simulate(true,false); back.lang('en');
+  back.click('option',0);
+  assert.equal(progressOf(back).text,'Question 2 of 5');
+  back.click('link-button');
+  assert.equal(progressOf(back).width,20);
+  assert.equal(progressOf(back).text,'Question 1 of 5');
+
+  const zh=simulate(true,false); zh.lang('zh-CN');
+  assert.equal(progressOf(zh).text,'第1题，共5题');
+  zh.click('option',1);
+  assert.equal(progressOf(zh).text,'第2题，共5题');
+  zh.click('option',0); zh.click('option',0);
+  const later=progressOf(zh);
+  assert.equal(later.text,'第4题，共5题');
+  assert.equal(later.width,80);
+  assert.equal(later.max,5,'returning branch keeps the same total');
+
+  for(const code of Object.keys(packs)){
+    const s=simulate(true,false); s.lang(code);
+    const first=progressOf(s);
+    assert.equal(first.now,1);
+    assert.equal(first.max,5);
+    assert.ok(first.text.includes('1')&&first.text.includes('5'), code+' names this step and the total');
+    s.click('option',0);
+    const second=progressOf(s);
+    assert.equal(second.now,2);
+    assert.equal(second.max,5, code+' total does not change after the first answer');
+  }
+  const legacy=simulate(false,false); legacy.lang('en');
+  assert.equal(progressOf(legacy).text,'Question 1 of 5');
   console.log('PASS: eleven language acquisition branches, new/returning records, preview no-write and legacy production');
 })().catch(e=>{console.error(e);process.exitCode=1;});
